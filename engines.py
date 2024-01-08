@@ -77,13 +77,13 @@ def validator(model, data_loader, device, loss_function, args, idx_to_answer_typ
 
     # Concatenate the results on the master process
     if dist.get_rank() == 0:
-        final_question_ids = torch.cat(gathered_question_ids, dim=0)
-        final_predictions = torch.cat(gathered_predictions, dim=0)
-        final_targets = torch.cat(gathered_targets, dim=0)
+        final_question_ids = torch.cat(gathered_question_ids, dim=0).cpu().tolist()
+        final_predictions = torch.cat(gathered_predictions, dim=0).cpu().tolist()
+        final_targets = torch.cat(gathered_targets, dim=0).cpu().tolist()
 
-        print(final_question_ids)
-        print(final_predictions)
-        print(final_targets)
+        print(final_question_ids, len(final_question_ids))
+        print(final_predictions, len(final_predictions))
+        print(final_targets, len(final_targets))
     
 
     val_data = pd.DataFrame(total_outputs)
