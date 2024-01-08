@@ -37,7 +37,8 @@ def trainer(model, data_loader, optimizer, loss_function, epoch, device, schedul
     
 
 @torch.no_grad()
-def validator(model, data_loader, device, loss_function, args, idx_to_answer_type):
+def validator(model, data_loader, device, loss_function, args):
+    
     print()
     model.eval()
     print_freq = args.print_freq
@@ -80,23 +81,20 @@ def validator(model, data_loader, device, loss_function, args, idx_to_answer_typ
         final_question_ids = torch.cat(gathered_question_ids, dim=0).cpu().tolist()
         final_predictions = torch.cat(gathered_predictions, dim=0).cpu().tolist()
         final_targets = torch.cat(gathered_targets, dim=0).cpu().tolist()
-
-        print(final_question_ids, len(final_question_ids))
-        print(final_predictions, len(final_predictions))
-        print(final_targets, len(final_targets))
     
+        val_data = {
+            "id": final_question_ids,
+            "prediction": final_predictions,
+            "target":final_targets
+        }
+        val_data = pd.DataFrame(val_data)
+        val_result = calculate_accuracies(model, data_loader.dataset)
+        metric_logger.synchronize_between_processes()
+        print(f"Averaged stats: {metric_logger.global_avg()}: {val_result}")
 
-    val_data = pd.DataFrame(total_outputs)
-    
-        
-    print(val_data)
-    val_result = calculate_accuracies(val_data)
-    metric_logger.synchronize_between_processes()
-    print(f"Averaged stats: {metric_logger.global_avg()}: {val_result}")
-
-    result = {k: meter.global_avg for k, meter in metric_logger.meters.items()}
-    result.update(val_result)
-    return result
+        result = {k: meter.global_avg for k, meter in metric_logger.meters.items()}
+        result.update(val_result)
+        return result
         
     
     

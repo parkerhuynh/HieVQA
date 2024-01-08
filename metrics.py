@@ -1,19 +1,26 @@
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
-
-def calculate_vqa_accuracy(data):
+import json
+def calculate_vqa_accuracy(result_data, dataset):
     """
     Calculate the accuracy of VQA predictions based on large_question_type.
 
     Parameters:
-    data (pd.DataFrame): DataFrame containing columns 'question_type', 'vqa', 
+    result_data (pd.result_dataFrame): result_dataFrame containing columns 'question_type', 'vqa', 
                          'question_type_label', 'vqa_label', and 'large_question_type'.
 
     Returns:
     dict: A dictionary with 'large_question_type' as keys and accuracy as values.
     """
+    result_data["prediction class"] = result_data["prediction"].apply(lambda x: dataset.idx_to_ans(x))
+    result_data["target class"] = result_data["target"].apply(lambda x: dataset.idx_to_ans(x))
+    
+    print(result_data)
+    
+    
+    
     accuracies = {}
-    for lqt in data['large_question_type'].unique():
-        df_lqt = data[data['large_question_type'] == lqt]
+    for lqt in result_data['large_question_type'].unique():
+        df_lqt = result_data[result_data['large_question_type'] == lqt]
         correct_predictions = ((df_lqt['question_type'] == df_lqt['question_type_label']) & 
                                (df_lqt['vqa'] == df_lqt['vqa_label'])).sum()
         total_instances = len(df_lqt)
@@ -24,9 +31,9 @@ def calculate_vqa_accuracy(data):
     formatted_accuracies = {
         f'val_{lqt.lower().replace("/","_")}_accuracy': accuracy for lqt, accuracy in accuracies.items()
     }
-    overall_correct_predictions = ((data['question_type'] == data['question_type_label']) & 
-                                   (data['vqa'] == data['vqa_label'])).sum()
-    total_instances = len(data)
+    overall_correct_predictions = ((result_data['question_type'] == result_data['question_type_label']) & 
+                                   (result_data['vqa'] == result_data['vqa_label'])).sum()
+    total_instances = len(result_data)
     vqa_accuracy = overall_correct_predictions / total_instances if total_instances > 0 else 0
     formatted_accuracies.update({"val_accuracy_vqa":vqa_accuracy})
     return formatted_accuracies

@@ -29,7 +29,7 @@ class VQADataset(Dataset):
         self.ans_size = len(self.ans_to_ix)
         
         self.questions = self.load_questions()
-        self.annotations = self.load_annotations() if split != 'test' else []
+        self.annotations, self.idx_to_ans  = self.load_annotations() if split != 'test' else ([], [])
         
         random.shuffle(self.annotations)
 
@@ -76,13 +76,14 @@ class VQADataset(Dataset):
             annotations.extend(self.load_json_file(full_path)['annotations'])
             
         annotations = annotation_preprocessing(annotations)
-        
+        idx_to_ans = {}
         processed_ann = []
         for ann in annotations:
+            idx_to_ans[ann["id"]] = ann
             answer_str_qt = ann["answer"]
             ann["answer_idx"] = self.ans_to_ix[answer_str_qt]
             processed_ann.append(ann)
-        return processed_ann
+        return processed_ann, idx_to_ans
 
     def prepare_question_vocab(self):
         """
