@@ -26,7 +26,11 @@ import warnings
 import torch.distributed as dist
 # Hiding runtime warnings
 warnings.filterwarnings('ignore', category=RuntimeWarning)
-
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix
+from io import BytesIO
 
 
 def main(args):
@@ -144,13 +148,38 @@ def main(args):
                 torch.save(model_without_ddp, last_model_path)
                 
                 if val_accuraciess['val_accuracy_vqa'] > best_acc:
-                    val_prediction_csv.to_csv("predictiton.csv", index=False)
+                    val_prediction_csv.to_csv("prediction.csv", index=False)
                     directory = os.getcwd()
-                    file_path = os.path.join(directory, "predictiton.csv")
+                    file_path = os.path.join(directory, "prediction.csv")
                     wandb.save(file_path, directory)
                     best_acc = val_accuraciess['val_accuracy_vqa']
                     best_model_path = os.path.join(args.output_dir, "best_model_state.pt")
                     torch.save(model_without_ddp, best_model_path)
+                    
+                    
+                    y_true = val_prediction_csv['small_answer_type_target']
+                    y_pred = val_prediction_csv['small_answer_type_prediction']
+
+                    # Generating the confusion matrix
+                    conf_matrix = confusion_matrix(y_true, y_pred, labels=y_true.unique())
+
+                    # Plotting the confusion matrix
+                    plt.figure(figsize=(10, 8))
+                    sns.heatmap(conf_matrix, annot=True, fmt='d', xticklabels=y_true.unique(), yticklabels=y_true.unique(), cmap='Blues')
+                    plt.title('Confusion Matrix')
+                    plt.xlabel('Predicted Label')
+                    plt.ylabel('True Label')
+
+                    # Save the plot to a buffer
+                    buffer = BytesIO()
+                    plt.savefig(buffer, format='png')
+                    buffer.seek(0)
+
+                    # Log the confusion matrix image to wandb
+                    wandb.log({"Confusion Matrix": wandb.Image(buffer)})
+
+                    # Close the plot
+                    plt.close()
             print("\n")
         if is_main_process():
             wandb.finish()
