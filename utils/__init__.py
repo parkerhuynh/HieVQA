@@ -408,8 +408,10 @@ def initialize_wandb(args):
     """Initialize Weights & Biases tracking."""
     tags=[args.model, args.task, args.dataset, args.version]
     if is_main_process():
-        branch = f"{args.model}-{args.task}-{args.version}"
+        branch = f"{args.model}/{args.task}/{args.version}/{args.dataset}"
         message = args.note
+        os.system(f'git config --global user.email "dunghuynh110496@gmail.com"')
+        os.system(f'git config --global user.name "parkerhuynh"')
         
         branch_exists = os.system(f"git rev-parse --verify {branch}")
         if branch_exists != 0:
