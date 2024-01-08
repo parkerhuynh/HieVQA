@@ -115,7 +115,7 @@ class VQADataset(Dataset):
     def __len__(self):
         if self.split =="train":
             return self.args.batch_size_train*2
-        return len(self.annotations)
+        return self.args.batch_size_train*2
     
     
     def example_processing(self, image, ques, ann):

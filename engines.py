@@ -88,7 +88,7 @@ def validator(model, data_loader, device, loss_function, args):
             "target":final_targets
         }
         val_data = pd.DataFrame(val_data)
-        val_result = calculate_accuracies(model, data_loader.dataset)
+        val_result = calculate_accuracies(val_data, data_loader.dataset)
         metric_logger.synchronize_between_processes()
         print(f"Averaged stats: {metric_logger.global_avg()}: {val_result}")
 
