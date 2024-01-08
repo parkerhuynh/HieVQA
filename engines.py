@@ -88,7 +88,9 @@ def validator(model, data_loader, device, loss_function, args):
             "target":final_targets
         }
         val_prediction_csv = pd.DataFrame(val_prediction_csv)
-        val_accuracies = calculate_accuracies(val_prediction_csv, data_loader.dataset)
+        val_accuracies, val_prediction_csv = calculate_accuracies(val_prediction_csv, data_loader.dataset)
+        
+        
         if args.wandb:
             wandb.log(val_accuracies)
     metric_logger.synchronize_between_processes()

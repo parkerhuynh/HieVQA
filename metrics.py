@@ -30,6 +30,6 @@ def calculate_accuracies(df, dataset):
     
     df["small_answer_type_target"] = df["target class"].apply(lambda x: super_type[x])
     df["small_answer_type_prediction"] = df["prediction class"].apply(lambda x: super_type[x])
-    print(df)
+
     accuracy_vqa = calculate_vqa_accuracy(df)
-    return accuracy_vqa
+    return accuracy_vqa, df
