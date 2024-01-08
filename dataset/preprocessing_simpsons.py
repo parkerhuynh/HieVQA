@@ -172,32 +172,6 @@ def ans_stat(stat_ans_list, max_frequency):
         ans_to_ix[ans] = ans_to_ix.__len__()
     
     return ans_to_ix, ix_to_ans
-def get_top_answers(examples, args):
-    counts = {}
-    for ex in examples:
-        try:
-            ans = prep_ans(ex['multiple_choice_answer'])
-        except:
-            ans = prep_ans(ex['answer'])
-        counts[ans] = counts.get(ans, 0) + 1
-
-    cw = sorted([(count,w) for w,count in counts.items()], reverse=True)
-    tok2ans = {}
-    ans2tok = {}
-    max_freq = 0
-     
-    if args.data_config['top_answers'] > len(counts):
-        max_freq = len(counts)
-    else:
-        max_freq = args.data_config['top_answers'] 
-
-    for i in range(max_freq):
-        
-        tok2ans[i+1] = cw[i][1]
-        ans2tok[cw[i][1]] = i+1
-    tok2ans[0] = "unknown"
-    ans2tok["unknown"] = 0
-    return ans2tok, tok2ans
 
 def create_ann_vocal(examples, args):
     counts = {}
@@ -222,7 +196,7 @@ def create_ann_vocal(examples, args):
     for i in range(max_freq):
         answer = cw[i][1]
         ans2tok[answer] =  idx
-        tok2ans[answer] = idx
+        tok2ans[idx] = answer
         idx += 1
     return ans2tok, tok2ans 
 
