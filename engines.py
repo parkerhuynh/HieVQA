@@ -53,22 +53,27 @@ def validator(model, data_loader, device, loss_function, args, idx_to_answer_typ
             vqa_loss = loss_function(vqa_outputs, answers)
             
             metric_logger.update(vqa_loss=vqa_loss.item())
-            question_id = question_id.tolist()
 
             _, vqa_predicted  = torch.max(vqa_outputs, 1)
-            vqa_predicted_classes = vqa_predicted.cpu().tolist()
+
 
             total_outputs["question_id"] += question_id
-            total_outputs["prediction"] += vqa_predicted_classes
+            total_outputs["prediction"] += vqa_predicted
             total_outputs["target"] += answer_str
-    
-    gather_predictions = {"question_id": [], "prediction": [], "target": []} 
+    gather_predictions = {"question_id": [], "prediction": [], "target": []}
     local_size = vqa_predicted.size()
-    local_size = tuple(local_size)
+    local_size_tuple = tuple(local_size)
+
     if is_main_process():
         for key in gather_predictions.keys():
-            gathered_predictions = torch.empty(dist.get_world_size(), local_size, device=vqa_predicted.device, dtype=vqa_predicted.dtype)
-            gather_predictions[key]+= gathered_predictions
+            # Correctly form the size tuple for the gathered_predictions tensor
+            # Assuming you want a tensor of shape (world_size, *local_size_tuple)
+            tensor_size = (dist.get_world_size(), *local_size_tuple)
+            gathered_predictions = torch.empty(tensor_size, device=vqa_predicted.device, dtype=vqa_predicted.dtype)
+            # You might want to gather predictions here or do other operations
+            # For now, just appending the empty tensor
+            gather_predictions[key].append(gathered_predictions)
+
     print(gather_predictions)
     val_data = pd.DataFrame(total_outputs)
     
