@@ -43,9 +43,9 @@ def validator(model, data_loader, device, loss_function, args, idx_to_answer_typ
     print_freq = args.print_freq
     metric_logger = MetricLogger(delimiter="  ")
     metric_logger.add_meter('vqa_loss', SmoothedValue(window_size=1, fmt='{value:.6f}'))
-    question_ids = torch.empty()
-    predictions = torch.empty()
-    targets = torch.empty()
+    question_ids = []
+    predictions = []
+    targets = []
     for i, (images, questions, answers, answer_str, question_id) in enumerate(metric_logger.log_every(data_loader, print_freq, 'Validation:')):
         with torch.no_grad():
             images, questions, answers, question_id= images.to(device), questions.to(device), answers.to(device), question_id.to(device)
@@ -54,13 +54,41 @@ def validator(model, data_loader, device, loss_function, args, idx_to_answer_typ
             metric_logger.update(vqa_loss=vqa_loss.item())
             _, vqa_predicted  = torch.max(vqa_outputs, 1)
             
-            question_ids = torch.cat(question_ids,question_id)
-            predictions = torch.cat(predictions,vqa_predicted)
-            targets = torch.concat(targets, answers)
+            question_ids.append(question_id)
+            predictions.append(vqa_predicted)
+            targets.append(answers)
             
-    print(question_ids)
-    print(predictions)
-    print(targets)
+    question_ids_tensor = torch.cat(question_ids, dim=0)
+    predictions_tensor = torch.cat(predictions, dim=0)
+    targets_tensor = torch.cat(targets, dim=0)
+    
+    tensors_to_gather = [question_ids_tensor, predictions_tensor, targets_tensor]
+    
+    if dist.get_rank() == 0:
+        gathered_question_ids = [torch.empty_like(question_ids_tensor) for _ in range(dist.get_world_size())]
+        gathered_predictions = [torch.empty_like(predictions_tensor) for _ in range(dist.get_world_size())]
+        gathered_targets = [torch.empty_like(targets_tensor) for _ in range(dist.get_world_size())]
+    else:
+        gathered_question_ids = gathered_predictions = gathered_targets = None
+
+    # Gather the tensors
+    for tensor, gathered in zip(tensors_to_gather, [gathered_question_ids, gathered_predictions, gathered_targets]):
+        dist.gather(tensor, gather_list=gathered, dst=0)
+
+    # Concatenate the results on the master process
+    if dist.get_rank() == 0:
+        final_question_ids = torch.cat(gathered_question_ids, dim=0)
+        final_predictions = torch.cat(gathered_predictions, dim=0)
+        final_targets = torch.cat(gathered_targets, dim=0)
+
+        print(final_question_ids)
+        print(final_predictions)
+        print(final_targets)
+    
+    
+    
+    
+    
     gather_predictions = {"question_id": [], "prediction": [], "target": []}
     local_size = vqa_predicted.size()
     local_size_tuple = tuple(local_size)
