@@ -1,1 +1,0 @@
-/home/ndhuynh/github/HieVQA/dataset/preprocessing_simpsons.py
