@@ -85,25 +85,7 @@ def validator(model, data_loader, device, loss_function, args, idx_to_answer_typ
         print(final_predictions)
         print(final_targets)
     
-    
-    
-    
-    
-    gather_predictions = {"question_id": [], "prediction": [], "target": []}
-    local_size = vqa_predicted.size()
-    local_size_tuple = tuple(local_size)
 
-    if is_main_process():
-        for key in gather_predictions.keys():
-            # Correctly form the size tuple for the gathered_predictions tensor
-            # Assuming you want a tensor of shape (world_size, *local_size_tuple)
-            tensor_size = (dist.get_world_size(), *local_size_tuple)
-            gathered_predictions = torch.empty(tensor_size, device=vqa_predicted.device, dtype=vqa_predicted.dtype)
-            # You might want to gather predictions here or do other operations
-            # For now, just appending the empty tensor
-            gather_predictions[key].append(gathered_predictions)
-
-    print(gather_predictions)
     val_data = pd.DataFrame(total_outputs)
     
         
