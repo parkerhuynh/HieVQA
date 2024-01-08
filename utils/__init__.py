@@ -406,24 +406,20 @@ def set_random_seeds(seed):
         
 def initialize_wandb(args):
     """Initialize Weights & Biases tracking."""
-    tags=[args.model, args.task, args.dataset]
+    tags=[args.model, args.task, args.dataset, args.version]
     if is_main_process():
-        branch = "new_version"
-        message = "new loss"
+        branch = f"{args.model}-{args.task}-{args.version}"
+        message = args.note
         
         branch_exists = os.system(f"git rev-parse --verify {branch}")
         if branch_exists != 0:
             os.system(f"git branch {branch}")
-            time.sleep(3)
         os.system(f"git checkout {branch}")
         os.system(f"git commit -am \"{message}\"")
-        time.sleep(3)
         if branch_exists != 0:
-            os.system("git push origin {branch}")
-            time.sleep(3)
+            os.system(f"git push --set-upstream origin {branch}")
         else:
             os.system("git push")
-            time.sleep(3)
         code_version = os.popen('git rev-parse HEAD').read().strip()
         current_time = date_time.now().strftime("%d/%m/%y %H:%M")
         
@@ -432,6 +428,8 @@ def initialize_wandb(args):
         args.created = current_time
         args.branch = branch
         args.code_version = code_version
+        args.commit_link =  f"https://github.com/parkerhuynh/HieVQA/commit/{code_version}"
+        args.checkout = f"git checkout {code_version}"
         wandb.init(
             project="VQA",
             group=wandb_group_name,
@@ -452,6 +450,7 @@ def initialize_wandb(args):
             notes=args.note,
             config=vars(args),
             dir=args.wandb_dir)
+        
         
 def read_json(rpath):
     with open(rpath, 'r') as f:
