@@ -4,6 +4,7 @@ from utils import *
 from metrics import calculate_accuracies
 import pandas as pd
 from torch import nn
+import torch.distributed as dist
 
 
 def trainer(model, data_loader, optimizer, loss_function, epoch, device, scheduler, args, wandb):
@@ -54,14 +55,23 @@ def validator(model, data_loader, device, loss_function, args, idx_to_answer_typ
             metric_logger.update(vqa_loss=vqa_loss.item())
             question_id = question_id.tolist()
 
-            _, vqa_predicted_classes  = torch.max(vqa_outputs, 1)
-            vqa_predicted_classes = vqa_predicted_classes.cpu().tolist()
+            _, vqa_predicted  = torch.max(vqa_outputs, 1)
+            vqa_predicted_classes = vqa_predicted.cpu().tolist()
 
             total_outputs["question_id"] += question_id
             total_outputs["prediction"] += vqa_predicted_classes
             total_outputs["target"] += answer_str
-
+    
+    gather_predictions = {"question_id": [], "prediction": [], "target": []} 
+    local_size = vqa_predicted.size()   
+    if is_main_process():
+        for key in gather_predictions.keys():
+            gathered_predictions = torch.empty(dist.get_world_size(), local_size, device=vqa_predicted.device, dtype=vqa_predicted.dtype)
+            gather_predictions[key]+= gathered_predictions
+    print(gather_predictions)
     val_data = pd.DataFrame(total_outputs)
+    
+        
     print(val_data)
     val_result = calculate_accuracies(val_data)
     metric_logger.synchronize_between_processes()
