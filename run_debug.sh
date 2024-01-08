@@ -12,6 +12,7 @@ model="VQA-HieVQA"
 output_dir="/home/ndhuynh/github/HieVQA/results"
 task="hievqa"
 note="9types-debug"
+version="v5"
 bs=32
 bs_test=32
 

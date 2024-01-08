@@ -115,7 +115,7 @@ def main(args):
             # model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu])
         max_epoch = args.schedular['epochs']
         if args.debug:
-            max_epoch = 100
+            max_epoch = 4
             val_loader = train_loader
         start_epoch = 0
         best_loss = 10000
@@ -151,9 +151,6 @@ def main(args):
         if is_main_process():
             wandb.finish()
             
-
-        
-                    
 
 
 if __name__ == '__main__':
