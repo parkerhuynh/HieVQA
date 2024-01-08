@@ -51,6 +51,7 @@ def main(args):
         file_list = list_files_and_subdirectories(directory, args)
         for filename in file_list:
             file_path = os.path.join(directory, filename)
+            print(file_path, directory)
             wandb.save(file_path, directory)
         
 
@@ -126,7 +127,7 @@ def main(args):
                 train_loader.sampler.set_epoch(epoch)
             train_stats = trainer(model, train_loader, optimizer, loss_fn, epoch, device, lr_scheduler, args, wandb)
             
-            validation_stats, val_accuraciess = validator(model, val_loader, device, loss_fn, args)
+            validation_stats, val_accuraciess, val_prediction_csv = validator(model, val_loader, device, loss_fn, args)
 
             if args.wandb:
                 wandb_train_log = {**{f'train_{k}': float(v) for k, v in train_stats.items()},
@@ -144,7 +145,9 @@ def main(args):
                 torch.save(model_without_ddp, last_model_path)
                 
                 if val_accuraciess['val_accuracy_vqa'] > best_acc:
-                    best_loss = val_accuraciess['val_accuracy_vqa']
+                    val_prediction_csv.to_csv("predictiton.csv", index=False)
+                    
+                    best_acc = val_accuraciess['val_accuracy_vqa']
                     best_model_path = os.path.join(args.output_dir, "best_model_state.pt")
                     torch.save(model_without_ddp, best_model_path)
             print("\n")

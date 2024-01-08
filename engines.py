@@ -82,13 +82,13 @@ def validator(model, data_loader, device, loss_function, args):
         final_predictions = torch.cat(gathered_predictions, dim=0).cpu().tolist()
         final_targets = torch.cat(gathered_targets, dim=0).cpu().tolist()
     
-        val_data = {
+        val_prediction_csv = {
             "id": final_question_ids,
             "prediction": final_predictions,
             "target":final_targets
         }
-        val_data = pd.DataFrame(val_data)
-        val_accuracies = calculate_accuracies(val_data, data_loader.dataset)
+        val_prediction_csv = pd.DataFrame(val_prediction_csv)
+        val_accuracies = calculate_accuracies(val_prediction_csv, data_loader.dataset)
         if args.wandb:
             wandb.log(val_accuracies)
     metric_logger.synchronize_between_processes()
@@ -96,8 +96,8 @@ def validator(model, data_loader, device, loss_function, args):
     result = {k: meter.global_avg for k, meter in metric_logger.meters.items()}
     if dist.get_rank() == 0:
         print(f"Accuracies: {val_accuracies}")
-        return result, val_accuracies
-    return result, []
+        return result, val_accuracies, val_prediction_csv
+    return result, [], []
         
     
     
