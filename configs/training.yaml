@@ -1,0 +1,13 @@
+## Training
+num_dec_layers: 6
+batch_size_train: 32
+batch_size_test: 32
+max_tokens: 20
+k_test: 128
+max_ques_len: 20
+
+optimizer: {opt: adamW, lr: 10e-4, weight_decay: 0.01, lr_mult: 2}
+schedular: {sched: linear, lr: 10e-5, epochs: 100, num_warmup_steps: 1}
+start_eval: 0  # epoch index
+print_freq: 50
+delta: 0.7

@@ -1,0 +1,14 @@
+image_feature_output: 1024
+img_size: 448
+text_enc: "rnn"
+word_embedding: 300
+rnn_hidden_size: 512
+ques_feature_output: 1024
+number_layer: 2
+bidirectional: False
+image_channel_type: "normi"
+use_glove: True
+num_att_layers: 3
+loss_weight:
+  question_type: 1
+  vqa: 2

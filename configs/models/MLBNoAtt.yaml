@@ -1,0 +1,12 @@
+image_feature_output: 1024
+img_size: 448
+text_enc: rnn
+fusion:
+  word_embedding: 300
+  dim_v: 512
+  dim_q: 512
+  dim_h: 600
+  dropout_v: 0.5
+  dropout_q: 0.5
+  activation_v: tanh
+  activation_q: tanh
