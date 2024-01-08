@@ -47,7 +47,7 @@ def validator(model, data_loader, device, loss_function, args, idx_to_answer_typ
     predictions = []
     targets = []
     for i, (images, questions, answers, answer_str, question_id) in enumerate(metric_logger.log_every(data_loader, print_freq, 'Validation:')):
-        # print("val", questions, answers, question_types)
+        print(questions, answers, answer_str, question_id)
         with torch.no_grad():
             images, questions, answers= images.to(device), questions.to(device), answers.to(device)
             vqa_outputs = model(images, questions)
