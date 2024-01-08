@@ -20,7 +20,6 @@ from torch import nn
 import pandas as pd
 import wandb
 from datetime import datetime
-from loss import HierarchicalLoss
 
 from engines import trainer, validator
 import warnings
@@ -105,7 +104,7 @@ def main(args):
         arg_sche = AttrDict(args.schedular)
         arg_sche['step_per_epoch'] = math.ceil(train_dataset_size / (args.batch_size_train * world_size))
         lr_scheduler = create_scheduler(arg_sche, optimizer)
-        loss_fn =  HierarchicalLoss(args, train_dataset)
+        loss_fn =  torch.nn.CrossEntropyLoss()
 
         # lr_scheduler = None
         # optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
@@ -126,7 +125,7 @@ def main(args):
             if args.distributed:
                 train_loader.sampler.set_epoch(epoch)
             train_stats = trainer(model, train_loader, optimizer, loss_fn, epoch, device, lr_scheduler, args, wandb)
-            validation_stats = validator(model, val_loader, device, loss_fn, args, train_dataset.idx_to_answer_type)
+            validation_stats = validator(model, val_loader, device, loss_fn, args, train_dataset.ix_to_ans)
 
             if args.wandb:
                 wandb_train_log = {**{f'train_{k}': float(v) for k, v in train_stats.items()},
@@ -167,7 +166,7 @@ if __name__ == '__main__':
     parser.add_argument('--dataset', type=str)
     parser.add_argument('--note', type=str)
     parser.add_argument('--version', type=str)
-    parser.add_argument('--task', type=str, required=True, choices=['cvqa', 'qrvqa','acvqa', 'mergevqa', 'hievqa'])
+    parser.add_argument('--task', type=str, required=True, choices=['vqa-wo-ans'])
     parser.add_argument('--debug', action='store_true')
     parser.add_argument('--wandb', action='store_true')
     parser.add_argument('--wandb_dir', type=str, help="for fine-tuning")

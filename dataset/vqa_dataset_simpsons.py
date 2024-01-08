@@ -24,16 +24,12 @@ class VQADataset(Dataset):
         self.transform = transform
         self.split = split
         self.args = args
-        self.super_type = self.load_json_file(self.args.data_config["super_type"])
-        self.answer_type_to_idx= {"yes/no": 0, "number": 1, "other":2 , "action": 3, "color": 4, "object": 5, "location": 6, "human": 7}
-        self.idx_to_answer_type= {0: "yes/no", 1: "number", 2: "other", 3: "action", 4: "color", 5: "object", 6: "location", 7: "human"}
         self.token_to_ix, self.pretrained_emb, self.token_size = self.prepare_question_vocab()
         self.ans_to_ix, self.ix_to_ans = self.prepare_answer_vocab()
+        self.ans_size = len(self.ans_to_ix)
         
         self.questions = self.load_questions()
         self.annotations = self.load_annotations() if split != 'test' else []
-        
-        
         
         random.shuffle(self.annotations)
 
@@ -84,14 +80,7 @@ class VQADataset(Dataset):
         processed_ann = []
         for ann in annotations:
             answer_str_qt = ann["answer"]
-            answer_str = ann["processed_answer"]
-            question_type_str =  self.super_type[answer_str_qt]
-            question_dict = self.ans_to_ix[question_type_str]
-            answer_idx = question_dict[answer_str]
-            question_type_idx = self.answer_type_to_idx[question_type_str]
-            ann["question_type_str"] = question_type_str
-            ann["answer_idx"] = answer_idx
-            ann["question_type_idx"] = question_type_idx
+            ann["answer_idx"] = self.ans_to_ix[answer_str_qt]
             processed_ann.append(ann)
         return processed_ann
 
@@ -118,8 +107,7 @@ class VQADataset(Dataset):
             stat_ans_list += self.load_json_file(ans_path)['annotations']
         stat_ans_list = annotation_preprocessing(stat_ans_list)
         
-        ans_to_ix, ix_to_ans = annotation_vocal(stat_ans_list, self.args, self.super_type)
-        
+        ans_to_ix, ix_to_ans = annotation_vocal(stat_ans_list, self.args)
         return ans_to_ix, ix_to_ans
         
     
@@ -136,9 +124,8 @@ class VQADataset(Dataset):
         """
         # question = rnn_proc_ques(ques["question"], self.token_to_ix, self.args.max_ques_len)
         question=  torch.from_numpy(ques["question"])
-        if self.args.dataset =="simpsonsvqa" and self.split != 'test':
-            
-            return image, question, ann["question_type_idx"], ann["answer_idx"], ann["answer_type"]
+        if self.split != 'test':
+            return image, question, ann["answer_idx"], ann['answer'], ann['id']
         else:
             return image, question, ques['id']
     
@@ -167,12 +154,5 @@ def annotation_preprocessing( anns):
         if ans_count >= 2:
             ann["question_label"]= 1
             ann["answer"] = prep_ans(ann["answer"])
-            ann["processed_answer"] = prep_ans(ann["answer"])
-            proccesed_anns.append(ann)
-        elif ann["overall_scores"]["question"] < 0.5:
-            ann["question_label"]= 0
-            ann["answer"] = prep_ans(ann["answer"])
-            ann['processed_answer'] = "unanswerable"
-            ann['answer_type'] = "unanswerable"
             proccesed_anns.append(ann)
     return proccesed_anns

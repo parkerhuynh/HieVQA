@@ -55,7 +55,6 @@ def create_sampler(datasets, shuffles, num_tasks, global_rank):
 
 
 def create_loader(datasets, samplers, args, istrain=True):
-     
     if args.checkpoint != "":
         test_dataset = datasets[0]
         # test_sampler = samplers[0]

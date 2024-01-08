@@ -199,73 +199,36 @@ def get_top_answers(examples, args):
     ans2tok["unknown"] = 0
     return ans2tok, tok2ans
 
-def hie_get_top_answers(examples, args, super_type):
+def create_ann_vocal(examples, args):
     counts = {}
     for ex in examples:
         try:
             ans = prep_ans(ex['multiple_choice_answer'])
         except:
-            ans = prep_ans(ex['processed_answer'])
+            ans = prep_ans(ex['answer'])
         counts[ans] = counts.get(ans, 0) + 1
 
     cw = sorted([(count,w) for w,count in counts.items()], reverse=True)
     tok2ans = {}
     ans2tok = {}
     max_freq = 0
-    idx = {}
+    idx = 0
      
     if args.data_config['top_answers'] > len(counts):
         max_freq = len(counts)
     else:
         max_freq = args.data_config['top_answers'] 
-    
-
+        
     for i in range(max_freq):
         answer = cw[i][1]
-        if answer != "unanswerable":
-            answer_type = super_type[answer]
-            
-            if answer_type not in ans2tok:
-                ans2tok[answer_type] = {"unanswerable": 0}
-            if answer_type not in tok2ans:
-                tok2ans[answer_type] = {0:"unanswerable"}
-            if answer_type not in idx:
-                idx[answer_type] = 1
-            ans2tok[answer_type][answer] = idx[answer_type]
-            tok2ans[answer_type][idx[answer_type]] = answer
-            idx[answer_type] += 1
-    # tok2ans["unanswerable"] = {0:"unanswerable", 1: "answerable"}
-    # ans2tok["unanswerable"] = {"unanswerable": 0, "answerable": 1}
+        ans2tok[answer] =  idx
+        tok2ans[answer] = idx
+        idx += 1
     return ans2tok, tok2ans 
 
 
-def example_filter(examples, an2tok):
-    new_examples = []
-    for i, ex in enumerate(examples):
-        try:
-            answer = prep_ans(ex['multiple_choice_answer'])
-        except:
-            answer = prep_ans(ex['answer'])
-        
-        if answer in list(an2tok.keys()):
-            try:
-                ex['multiple_choice_answer'] = answer
-            except:
-                ex['answer'] = answer
-            new_examples.append(ex)
-    print('Number of examples reduced from %d to %d '%(len(examples), len(new_examples)))
-    return new_examples
-
-def answer_dict(anns, args, annotation_path):
-    # Loading answer word list
-    ans_to_ix, ix_to_ans = ans_stat(anns, args.max_anns_freq)
-    json.dump([ans_to_ix, ix_to_ans], open(annotation_path, 'w'))
-    return ans_to_ix, ix_to_ans
-
-
-
-def annotation_vocal(anns, args, super_type = None):
-    annotation_path = args.data_config['annotation_dict']
+def annotation_vocal(anns, args):
+    annotation_path = f"./dataset/ann_vocal_{args.task}_{args.dataset}.json"
     
     if os.path.exists(annotation_path):
         # print("3"*100)
@@ -273,10 +236,8 @@ def annotation_vocal(anns, args, super_type = None):
         ans_to_ix, ix_to_ans = json.load(open(annotation_path, 'r'))
     else:
         print(f'> Create and save {args.dataset} annotation dictionary'.upper())
-        ans_to_ix, ix_to_ans = hie_get_top_answers(anns,args, super_type)
+        ans_to_ix, ix_to_ans = create_ann_vocal(anns,args)
         json.dump([ans_to_ix, ix_to_ans], open(annotation_path, 'w'))
-            
-        # ans_to_ix, ix_to_ans = answer_dict(anns, args, annotation_path)
     return ans_to_ix, ix_to_ans
 
 

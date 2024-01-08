@@ -8,11 +8,11 @@ NPROC_PER_NODE=2 # Number of processes per node
 # Variables for the command
 data_path="/home/ndhuynh/data/simpsonsvqa"
 dataset="simpsonsvqa"
-model="VQA-HieVQA"
+model="VQA"
 output_dir="/home/ndhuynh/github/HieVQA/results"
-task="hievqa"
-note="9types-debug"
-version="v5"
+task=vqa-wo-ans # vqa-w-ans & vqa-hie
+note="vqa"
+version="v1"
 bs=32
 bs_test=32
 
