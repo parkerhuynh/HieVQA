@@ -16,23 +16,22 @@ def calculate_vqa_accuracy(result_data):
     
     
     accuracies = {}
-    for lqt in result_data['large_question_type'].unique():
-        df_lqt = result_data[result_data['large_question_type'] == lqt]
-        correct_predictions = ((df_lqt['question_type'] == df_lqt['question_type_label']) & 
-                               (df_lqt['vqa'] == df_lqt['vqa_label'])).sum()
+    for lqt in result_data['answer_type'].unique():
+        df_lqt = result_data[result_data['answer_type'] == lqt]
+        correct_predictions = ((df_lqt['prediction'] == df_lqt['target'])).sum()
         total_instances = len(df_lqt)
         accuracies[lqt] = correct_predictions / total_instances if total_instances > 0 else 0
     
     # Preparing to save accuracies with specified key names
     
     formatted_accuracies = {
-        f'val_{lqt.lower().replace("/","_")}_accuracy': accuracy for lqt, accuracy in accuracies.items()
+        f'{lqt.lower().replace("/","_")}_accuracy': accuracy for lqt, accuracy in accuracies.items()
     }
     overall_correct_predictions = ((result_data['question_type'] == result_data['question_type_label']) & 
                                    (result_data['vqa'] == result_data['vqa_label'])).sum()
     total_instances = len(result_data)
     vqa_accuracy = overall_correct_predictions / total_instances if total_instances > 0 else 0
-    formatted_accuracies.update({"val_accuracy_vqa":vqa_accuracy})
+    formatted_accuracies.update({"accuracy_vqa":vqa_accuracy})
     return formatted_accuracies
 
 def calculate_accuracies(df, dataset):
