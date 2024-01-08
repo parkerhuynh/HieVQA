@@ -63,7 +63,8 @@ def validator(model, data_loader, device, loss_function, args, idx_to_answer_typ
             total_outputs["target"] += answer_str
     
     gather_predictions = {"question_id": [], "prediction": [], "target": []} 
-    local_size = vqa_predicted.size()   
+    local_size = vqa_predicted.size()
+    local_size = tuple(local_size)
     if is_main_process():
         for key in gather_predictions.keys():
             gathered_predictions = torch.empty(dist.get_world_size(), local_size, device=vqa_predicted.device, dtype=vqa_predicted.dtype)
