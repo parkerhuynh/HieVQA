@@ -13,8 +13,8 @@ output_dir="/home/ndhuynh/github/HieVQA/results"
 task=vqa-wo-ans # vqa-w-ans & vqa-hie
 note="vqa"
 version="v1"
-bs=32
-bs_test=32
+bs=33
+bs_test=33
 
 # Print system information
 echo "=========== System Information ==========="
