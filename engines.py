@@ -88,13 +88,16 @@ def validator(model, data_loader, device, loss_function, args):
             "target":final_targets
         }
         val_data = pd.DataFrame(val_data)
-        val_result = calculate_accuracies(val_data, data_loader.dataset)
-        print(val_result)
+        val_accuracies = calculate_accuracies(val_data, data_loader.dataset)
+        if args.wandb:
+            wandb.log(val_accuracies)
     metric_logger.synchronize_between_processes()
-    print(f"Averaged stats: {metric_logger.global_avg()}: {val_result}")
-
+    print(f"Averaged stats: {metric_logger.global_avg()}")
     result = {k: meter.global_avg for k, meter in metric_logger.meters.items()}
-    return result
+    if dist.get_rank() == 0:
+        print(f"Accuracies: {val_accuracies}")
+        return result, val_accuracies
+    return result, []
         
     
     

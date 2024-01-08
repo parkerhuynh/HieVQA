@@ -117,7 +117,7 @@ def main(args):
             max_epoch = 4
             val_loader = train_loader
         start_epoch = 0
-        best_loss = 10000
+        best_acc = 0
         if is_main_process():
             print(model)
         for epoch in range(start_epoch, max_epoch):
@@ -126,7 +126,7 @@ def main(args):
                 train_loader.sampler.set_epoch(epoch)
             train_stats = trainer(model, train_loader, optimizer, loss_fn, epoch, device, lr_scheduler, args, wandb)
             
-            validation_stats = validator(model, val_loader, device, loss_fn, args)
+            validation_stats, val_accuraciess = validator(model, val_loader, device, loss_fn, args)
 
             if args.wandb:
                 wandb_train_log = {**{f'train_{k}': float(v) for k, v in train_stats.items()},
@@ -143,8 +143,8 @@ def main(args):
                 last_model_path = os.path.join(args.output_dir, "model_latest_epoch.pt")
                 torch.save(model_without_ddp, last_model_path)
                 
-                if validation_stats['weighted_loss'] < best_loss:
-                    best_loss = validation_stats['weighted_loss']
+                if val_accuraciess['val_accuracy_vqa'] > best_acc:
+                    best_loss = val_accuraciess['val_accuracy_vqa']
                     best_model_path = os.path.join(args.output_dir, "best_model_state.pt")
                     torch.save(model_without_ddp, best_model_path)
             print("\n")
