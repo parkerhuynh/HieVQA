@@ -41,12 +41,5 @@ def calculate_accuracies(df, dataset):
     
     df["answer_type"] = df["id"].apply(lambda x: dataset.idx_to_ann[x]["answer_type"])
     
-    print(df)
-    accuracy_type = accuracy_score(df['question_type_label'], df['question_type'])
-    # # Calculate combined accuracy for VQA
-    # correct_vqa_predictions = df[(df['question_type'] == df['question_type_label']) & 
-    #                              (df['vqa'] == df['vqa_label'])]
     accuracy_vqa = calculate_vqa_accuracy(df)
-    result_dic = {'accuracy_question_type': accuracy_type}
-    result_dic.update(accuracy_vqa)
-    return result_dic
+    return accuracy_vqa
