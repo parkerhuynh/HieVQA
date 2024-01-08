@@ -40,7 +40,7 @@ def calculate_accuracies(df, dataset):
     df["prediction class"] = df["prediction"].apply(lambda x: dataset.ix_to_ans[str(x)])
     df["target class"] = df["target"].apply(lambda x: dataset.ix_to_ans[str(x)])
     
-    df["answer_type"] = df["id"].apply(lambda x: dataset.ix_to_ann[x]["answer_type"])
+    df["answer_type"] = df["id"].apply(lambda x: dataset.idx_to_ann[x]["answer_type"])
     
     print(df)
     accuracy_type = accuracy_score(df['question_type_label'], df['question_type'])
