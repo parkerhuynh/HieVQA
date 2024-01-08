@@ -37,6 +37,7 @@ def calculate_vqa_accuracy(result_data):
 
 def calculate_accuracies(df, dataset):
     print(df)
+    print(dataset.ans_to_ix)
     df["prediction class"] = df["prediction"].apply(lambda x: dataset.ans_to_ix[str(x)])
     df["target class"] = df["target"].apply(lambda x: dataset.ans_to_ix[str(x)])
     
