@@ -76,10 +76,10 @@ class VQADataset(Dataset):
             annotations.extend(self.load_json_file(full_path)['annotations'])
             
         annotations = annotation_preprocessing(annotations)
-        idx_to_ans = {}
+        idx_to_ann = {}
         processed_ann = []
         for ann in annotations:
-            idx_to_ans[ann["id"]] = ann
+            idx_to_ann[ann["id"]] = ann
             answer_str_qt = ann["answer"]
             ann["answer_idx"] = self.ans_to_ix[answer_str_qt]
             processed_ann.append(ann)
