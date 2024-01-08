@@ -51,7 +51,6 @@ def main(args):
         file_list = list_files_and_subdirectories(directory, args)
         for filename in file_list:
             file_path = os.path.join(directory, filename)
-            print(file_path, directory)
             wandb.save(file_path, directory)
         
 
@@ -146,7 +145,9 @@ def main(args):
                 
                 if val_accuraciess['val_accuracy_vqa'] > best_acc:
                     val_prediction_csv.to_csv("predictiton.csv", index=False)
-                    
+                    directory = os.getcwd()
+                    file_path = os.path.join(directory, "predictiton.csv")
+                    wandb.save(file_path, directory)
                     best_acc = val_accuraciess['val_accuracy_vqa']
                     best_model_path = os.path.join(args.output_dir, "best_model_state.pt")
                     torch.save(model_without_ddp, best_model_path)
