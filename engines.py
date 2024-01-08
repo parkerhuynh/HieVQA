@@ -43,7 +43,9 @@ def validator(model, data_loader, device, loss_function, args, idx_to_answer_typ
     print_freq = args.print_freq
     metric_logger = MetricLogger(delimiter="  ")
     metric_logger.add_meter('vqa_loss', SmoothedValue(window_size=1, fmt='{value:.6f}'))
-    total_outputs = {"question_id": [], "prediction": [], "target": []}
+    question_ids = []
+    predictions = []
+    targets = []
     for i, (images, questions, answers, answer_str, question_id) in enumerate(metric_logger.log_every(data_loader, print_freq, 'Validation:')):
         # print("val", questions, answers, question_types)
         with torch.no_grad():
@@ -57,9 +59,12 @@ def validator(model, data_loader, device, loss_function, args, idx_to_answer_typ
             _, vqa_predicted  = torch.max(vqa_outputs, 1)
 
 
-            total_outputs["question_id"] += question_id
-            total_outputs["prediction"] += vqa_predicted
-            total_outputs["target"] += answer_str
+            question_ids += question_id
+            predictions += vqa_predicted
+            targets += answer_str
+    print(question_ids)
+    print(predictions)
+    print(targets)
     gather_predictions = {"question_id": [], "prediction": [], "target": []}
     local_size = vqa_predicted.size()
     local_size_tuple = tuple(local_size)
