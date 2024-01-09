@@ -124,9 +124,9 @@ def main(args):
             # model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu])
         
         max_epoch = args.schedular['epochs']
-        # if args.debug:
-        #     max_epoch = 200
-        #     val_loader = train_loader
+        if args.debug:
+            max_epoch = 3
+            val_loader = train_loader
         start_epoch = 0
         best_acc = 0
         val_prediction_csv = None
@@ -217,7 +217,7 @@ def main(args):
             # Close the plot
             plt.close()
                     
-
+            directory = os.getcwd()
             file_path = os.path.join(directory, f"model_{args.code_version}.onnx")
             wandb.save(file_path, directory)
             os.remove(f"model_{args.code_version}.onnx")
