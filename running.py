@@ -181,7 +181,7 @@ def main(args):
             conf_matrix_normalized = conf_matrix.astype('float') / conf_matrix.sum(axis=1)[:, np.newaxis]
             
             # Set up the matplotlib figure for side-by-side plots
-            plt.figure(figsize=(30, 15))
+            plt.figure(figsize=(30, 12))
             
             # Regular confusion matrix
             plt.subplot(1, 2, 1)
