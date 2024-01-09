@@ -407,6 +407,7 @@ def set_random_seeds(seed):
 def initialize_wandb(args):
     """Initialize Weights & Biases tracking."""
     tags=[args.model, args.task, args.dataset, args.version]
+    current_time = date_time.now().strftime("%d/%m/%y %H:%M")
     if is_main_process():
         branch = f"{args.model}/{args.task}/{args.version}/{args.dataset}"
         message = args.note
@@ -423,15 +424,28 @@ def initialize_wandb(args):
         else:
             os.system("git push")
         code_version = os.popen('git rev-parse HEAD').read().strip()
-        current_time = date_time.now().strftime("%d/%m/%y %H:%M")
         
-        wandb_group_name = f"{args.model}-{args.task}-{args.dataset}-{args.version}-{args.note}"
-        wandb_running_name = f"{args.model}-{args.task}-{args.dataset}-{args.version}_cuda{get_rank()}"
+        
+        
+        
         args.created = current_time
         args.branch = branch
         args.code_version = code_version
         args.commit_link =  f"https://github.com/parkerhuynh/HieVQA/commit/{code_version}"
         args.checkout = f"git checkout {code_version}"
+        
+        
+        output_path = os.path.join(args.output_dir, f"{args.model}-{args.version}")
+        if not os.path.exists(output_path):
+            print(f"{'The output path doesnt exist:'.upper()} {output_path}")
+            print('creating'.upper())
+            os.makedirs(output_path, exist_ok=True)
+        output_path = os.path.join(output_path,  f'{args.dataset}-{args.task}-{code_version}')
+        os.makedirs(output_path, exist_ok=True)
+        args.output_dir = output_path
+        wandb_group_name = f"{args.model}-{args.task}-{args.dataset}-{args.version}-{args.note}"
+        wandb_running_name = f"{args.model}-{args.task}-{args.dataset}-{args.version}-cuda{get_rank()}-{current_time}"
+        
         wandb.init(
             project="VQA",
             group=wandb_group_name,
@@ -443,7 +457,7 @@ def initialize_wandb(args):
         )
     else:
         wandb_group_name = f"{args.model}-{args.task}-{args.dataset}-{args.version}-{args.note}"
-        wandb_running_name = f"{args.model}-{args.task}-{args.dataset}-{args.version}_cuda{get_rank()}"
+        wandb_running_name = f"{args.model}-{args.task}-{args.dataset}-{args.version}-cuda{get_rank()}-{current_time}"
         wandb.init(
             project="VQA",
             group=wandb_group_name,
