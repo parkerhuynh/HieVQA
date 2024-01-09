@@ -159,27 +159,22 @@ def main(args):
                     torch.save(model_without_ddp, best_model_path)
                     
                     
-                    y_true = data['small_answer_type_target']
-                    y_pred = data['small_answer_type_prediction']
-
-                    # Generating the confusion matrix
+                    y_true = val_prediction_csv['small_answer_type_target']
+                    y_pred = val_prediction_csv['small_answer_type_prediction']
                     conf_matrix = confusion_matrix(y_true, y_pred, labels=y_true.unique())
 
-                    # Plotting the confusion matrix
                     plt.figure(figsize=(10, 8))
                     sns.heatmap(conf_matrix, annot=True, fmt='d', xticklabels=y_true.unique(), yticklabels=y_true.unique(), cmap='Blues')
                     plt.title('Confusion Matrix')
                     plt.xlabel('Predicted Label')
                     plt.ylabel('True Label')
-
-                    # Save the plot to a buffer
                     buffer = BytesIO()
                     plt.savefig(buffer, format='png')
                     buffer.seek(0)
-
-                    # Convert BytesIO buffer to an image array
                     image = Image.open(buffer)
                     image_array = np.array(image)
+                    wandb.log({"Confusion Matrix": wandb.Image(image_array)})
+                    plt.close()
             print("\n")
         if is_main_process():
             wandb.finish()
