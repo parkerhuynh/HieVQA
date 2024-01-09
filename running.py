@@ -158,7 +158,7 @@ def main(args):
                 
                 if val_accuraciess['val_accuracy_vqa(vqa-wo-unans)'] > best_acc:
                     
-                    best_acc = val_accuraciess['val_accuracy_vqa']
+                    best_acc = val_accuraciess['val_accuracy_vqa(vqa-wo-unans)']
                     best_model_path = os.path.join(args.output_dir, "best_model_state.pt")
                     torch.save(model_without_ddp, best_model_path)
                     
