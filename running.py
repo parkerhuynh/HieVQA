@@ -181,7 +181,7 @@ def main(args):
             conf_matrix_normalized = conf_matrix.astype('float') / conf_matrix.sum(axis=1)[:, np.newaxis]
             
             # Set up the matplotlib figure for side-by-side plots
-            plt.figure(figsize=(20, 8))
+            plt.figure(figsize=(30, 15))
             
             # Regular confusion matrix
             plt.subplot(1, 2, 1)
@@ -220,7 +220,6 @@ def main(args):
             directory = os.getcwd()
             file_path = os.path.join(directory, f"model_{args.code_version}.onnx")
             wandb.save(file_path, directory)
-            os.remove(f"model_{args.code_version}.onnx")
             
             
 
