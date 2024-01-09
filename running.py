@@ -156,7 +156,7 @@ def main(args):
                 last_model_path = os.path.join(args.output_dir, "model_latest_epoch.pt")
                 torch.save(model_without_ddp, last_model_path)
                 
-                if val_accuraciess['val_accuracy_vqa(val_accuracy_vqa(vqa-wo-unans))'] > best_acc:
+                if val_accuraciess['val_accuracy_vqa(val_accuracy_vqa(vqa-wo-unans)'] > best_acc:
                     
                     best_acc = val_accuraciess['val_accuracy_vqa']
                     best_model_path = os.path.join(args.output_dir, "best_model_state.pt")
