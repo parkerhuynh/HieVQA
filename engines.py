@@ -26,7 +26,7 @@ def trainer(model, data_loader, optimizer, loss_function, epoch, device, schedul
         optimizer.step()
         scheduler.step()
         if args.wandb:
-            wandb.log({"vqa_loss": vqa_loss.item()})
+            wandb.log({"train_vqa_loss_iter": vqa_loss.item()})
         metric_logger.update(vqa_loss=vqa_loss)
         metric_logger.update(lr=optimizer.param_groups[0]["lr"])
     metric_logger.synchronize_between_processes()
