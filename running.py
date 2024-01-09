@@ -40,8 +40,6 @@ def main(args):
     print()
     # Initialize the distributed computing environment and other settings
     device, world_size = setup_environment(args)
-    # if is_main_process() and args.save_model:
-    #     args.output_dir = output_path_create(args)
     if args.bs > 0:
         args.batch_size_train = int(float(args.bs)/world_size)
     
@@ -150,7 +148,7 @@ def main(args):
                 wandb.log(wandb_train_log)
 
 
-            if is_main_process() and args.save_model:
+            if is_main_process() and args.wandb:
                 if hasattr(model, 'module'):
                     model_without_ddp = model.module
                 #Save model
@@ -173,9 +171,9 @@ def main(args):
 
                     plt.figure(figsize=(10, 8))
                     sns.heatmap(conf_matrix, annot=True, fmt='d', xticklabels=y_true.unique(), yticklabels=y_true.unique(), cmap='Blues')
-                    plt.title('Confusion Matrix')
-                    plt.xlabel('Predicted Label')
-                    plt.ylabel('True Label')
+                    plt.title(f'{args.task}-{args.version}-{args.version}-{args.dataset}-{args.task}-{args.created}')
+                    plt.xlabel('Predicted Type')
+                    plt.ylabel('True Type')
                     buffer = BytesIO()
                     plt.savefig(buffer, format='png')
                     buffer.seek(0)
@@ -211,8 +209,6 @@ if __name__ == '__main__':
     parser.add_argument('--wandb', action='store_true')
     parser.add_argument('--wandb_dir', type=str, help="for fine-tuning")
     parser.add_argument('--checkpoint', type=str, default='')
-    parser.add_argument('--save_model', action='store_true')
-
     args = parser.parse_args()
 
     #Check data path
