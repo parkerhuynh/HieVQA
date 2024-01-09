@@ -13,8 +13,9 @@ output_dir="/home/reda/scratch/ngoc/code/HieVQA/results"
 task=vqa-wo-ans # vqa-w-ans & vqa-hie
 note="vqa"
 version="v1"
-bs=32
-bs_test=32
+bs=256
+bs_test=256
+
 
 # Print system information
 echo "=========== System Information ==========="
@@ -28,8 +29,6 @@ echo "DATASET: $dataset"
 echo "MODEL: $model"
 echo "TASK: $task"
 echo "NOTE: $note"
-
-
 # Run the command
 CUDA_VISIBLE_DEVICES=0,1,2,3 WORLD_SIZE=$NPROC_PER_NODE python3 -m torch.distributed.launch --nproc_per_node=$NPROC_PER_NODE --nnodes=$NNODES --master_addr=$MASTER_ADDR --master_port=$MASTER_PORT \
     --use_env running.py \
@@ -42,7 +41,6 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 WORLD_SIZE=$NPROC_PER_NODE python3 -m torch.distrib
     --bs "$bs" \
     --bs_test "$bs_test" \
     --version "$version" \
-    --wandb \
-    --debug
+    --wandb
     
     

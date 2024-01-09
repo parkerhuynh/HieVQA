@@ -412,21 +412,26 @@ def initialize_wandb(args):
         tags=[args.model, args.task, args.dataset, args.version]
     current_time = date_time.now().strftime("%d/%m/%y %H:%M")
     if is_main_process():
+        with open("./PAT.txt", "r") as file:
+            pat = file.read().strip()
         branch = f"{args.model}/{args.task}/{args.version}/{args.dataset}"
         message = args.note
         os.system(f'git config --global user.email "dunghuynh110496@gmail.com"')
         os.system(f'git config --global user.name "parkerhuynh"')
+        os.system(f"git remote set-url origin https://parkerhuynh:{pat}@github.com/parkerhuynh/HieVQA.git")
+        os.system(f"git fetch --all")
+        
         
         branch_exists = os.system(f"git rev-parse --verify {branch}")
         if branch_exists != 0:
             os.system(f"git branch {branch}")
         os.system(f"git checkout {branch}")
         os.system(f"git commit -am \"{message}\"")
-        os.system(f"git remote --set-url origin https://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@github.com/parkerhuynh/HieVQA")
+        if branch_exists != 0:
+            os.system(f"git push --set-upstream origin {branch}")
+        else:
+            os.system("git push")
         code_version = os.popen('git rev-parse HEAD').read().strip()
-        
-        
-        
         
         args.created = current_time
         args.branch = branch
