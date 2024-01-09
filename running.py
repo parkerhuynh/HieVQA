@@ -214,8 +214,6 @@ def main(args):
 
             file_path = os.path.join(directory, "model.onnx")
             wandb.save(file_path, directory)
-            table = wandb.Table(dataframe=val_prediction_csv)
-            wandb.log({"My Data Table": table})
             
             
 
