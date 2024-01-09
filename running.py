@@ -33,6 +33,7 @@ from sklearn.metrics import confusion_matrix
 from io import BytesIO
 from PIL import Image
 import numpy as np
+import torch.onnx
 
 
 def main(args):
@@ -102,6 +103,11 @@ def main(args):
         args.optimizer['lr'] = float(args.optimizer['lr'])
         args.schedular['lr'] = float(args.schedular['lr'])
         model = get_model(args, train_dataset)
+        if is_main_process() and args.wandb:
+            model = model.eval()
+            example_image = train_dataset[0][0]
+            example_question = train_dataset[0][1]
+            torch.onnx.export(model, (example_image, example_question), "model.onnx")
         model = model.to(device)
         
         #OPTIMIZER and LOSS
@@ -118,6 +124,7 @@ def main(args):
         if args.distributed:
             model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu], find_unused_parameters=True).to(device)
             # model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu])
+        
         max_epoch = args.schedular['epochs']
         if args.debug:
             max_epoch = 3
