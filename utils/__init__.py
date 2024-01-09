@@ -438,7 +438,7 @@ def initialize_wandb(args):
             print(f"{'The output path doesnt exist:'.upper()} {output_path}")
             print('creating'.upper())
             os.makedirs(output_path, exist_ok=True)
-        output_path = os.path.join(output_path, f"{args.dataset}-{args.task}-{code_version}")
+        args.output_path = os.path.join(current_time, f"{args.dataset}-{args.dataset}-{args.task}-{code_version}")
         
         wandb.init(
             project="VQA",
