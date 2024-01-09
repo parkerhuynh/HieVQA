@@ -443,8 +443,9 @@ def initialize_wandb(args):
         output_path = os.path.join(output_path,  f'{args.dataset}-{args.task}-{code_version}')
         os.makedirs(output_path, exist_ok=True)
         args.output_dir = output_path
+        
         wandb_group_name = f"{args.model}-{args.task}-{args.dataset}-{args.version}-{args.note}"
-        wandb_running_name = f"{args.model}-{args.task}-{args.dataset}-{args.version}-cuda{get_rank()}-{current_time}"
+        wandb_running_name = f"cuda{get_rank()}-{current_time}-{args.model}-{args.version}-{args.task}-{args.dataset}"
         
         wandb.init(
             project="VQA",
@@ -457,7 +458,7 @@ def initialize_wandb(args):
         )
     else:
         wandb_group_name = f"{args.model}-{args.task}-{args.dataset}-{args.version}-{args.note}"
-        wandb_running_name = f"{args.model}-{args.task}-{args.dataset}-{args.version}-cuda{get_rank()}-{current_time}"
+        wandb_running_name = f"cuda{get_rank()}-{current_time}-{args.model}-{args.version}-{args.task}-{args.dataset}"
         wandb.init(
             project="VQA",
             group=wandb_group_name,
