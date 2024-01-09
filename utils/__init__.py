@@ -407,9 +407,9 @@ def set_random_seeds(seed):
 def initialize_wandb(args):
     """Initialize Weights & Biases tracking."""
     if args.debug:
-        tags=[args.model, args.task, args.dataset, args.version]
-    else:
         tags=[args.model, args.task, args.dataset, args.version, "debug"]
+    else:
+        tags=[args.model, args.task, args.dataset, args.version]
     current_time = date_time.now().strftime("%d/%m/%y %H:%M")
     if is_main_process():
         branch = f"{args.model}/{args.task}/{args.version}/{args.dataset}"
