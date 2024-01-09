@@ -31,6 +31,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix
 from io import BytesIO
+from PIL import Image
+import numpy as np
 
 
 def main(args):
@@ -118,7 +120,7 @@ def main(args):
             # model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu])
         max_epoch = args.schedular['epochs']
         if args.debug:
-            max_epoch = 4
+            max_epoch = 3
             val_loader = train_loader
         start_epoch = 0
         best_acc = 0
@@ -157,8 +159,8 @@ def main(args):
                     torch.save(model_without_ddp, best_model_path)
                     
                     
-                    y_true = val_prediction_csv['small_answer_type_target']
-                    y_pred = val_prediction_csv['small_answer_type_prediction']
+                    y_true = data['small_answer_type_target']
+                    y_pred = data['small_answer_type_prediction']
 
                     # Generating the confusion matrix
                     conf_matrix = confusion_matrix(y_true, y_pred, labels=y_true.unique())
@@ -175,11 +177,9 @@ def main(args):
                     plt.savefig(buffer, format='png')
                     buffer.seek(0)
 
-                    # Log the confusion matrix image to wandb
-                    wandb.log({"Confusion Matrix": wandb.Image(buffer)})
-
-                    # Close the plot
-                    plt.close()
+                    # Convert BytesIO buffer to an image array
+                    image = Image.open(buffer)
+                    image_array = np.array(image)
             print("\n")
         if is_main_process():
             wandb.finish()
