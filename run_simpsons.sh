@@ -8,12 +8,13 @@ NPROC_PER_NODE=2 # Number of processes per node
 # Variables for the command
 data_path="/home/ndhuynh/data/simpsonsvqa"
 dataset="simpsonsvqa"
-model="VQA-HieVQA"
-output_dir="/home/ndhuynh/github/simpsonsvqa/results"
-task="hievqa"
-note="9types-loss_v2"
-bs=256
-bs_test=256
+model="VQA"
+output_dir="/home/ndhuynh/github/HieVQA/results"
+task=vqa-wo-ans # vqa-w-ans & vqa-hie
+note="vqa"
+version="v1"
+bs=32
+bs_test=32
 
 # Print system information
 echo "=========== System Information ==========="
@@ -40,6 +41,8 @@ CUDA_VISIBLE_DEVICES=0,1 WORLD_SIZE=$NPROC_PER_NODE python3 -m torch.distributed
     --dataset "$dataset" \
     --bs "$bs" \
     --bs_test "$bs_test" \
+    --version "$version" \
     --wandb \
-    --running_log
+    --debug
+    
     
