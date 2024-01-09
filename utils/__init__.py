@@ -422,11 +422,8 @@ def initialize_wandb(args):
             os.system(f"git branch {branch}")
         os.system(f"git checkout {branch}")
         os.system(f"git commit -am \"{message}\"")
-        os.system(f"git remote --set-url origin https://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@github.com/parkerhuynh/HieVQA")
+        os.system(f"git remote set-url origin https://parkerhuynh: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@github.com/parkerhuynh/HieVQA.git")
         code_version = os.popen('git rev-parse HEAD').read().strip()
-        
-        
-        
         
         args.created = current_time
         args.branch = branch
