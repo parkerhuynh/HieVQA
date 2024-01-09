@@ -102,7 +102,6 @@ def main(args):
         args.schedular['lr'] = float(args.schedular['lr'])
         model = get_model(args, train_dataset)
         if is_main_process() and args.wandb:
-            model = model.eval()
             batch_example = next(iter(train_loader))
             example_image = batch_example[0]
             example_question = batch_example[1]
