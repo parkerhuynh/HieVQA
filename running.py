@@ -40,8 +40,6 @@ def main(args):
     print()
     # Initialize the distributed computing environment and other settings
     device, world_size = setup_environment(args)
-    if is_main_process() and args.wandb:
-        args.output_dir = output_path_create(args)
     if args.bs > 0:
         args.batch_size_train = int(float(args.bs)/world_size)
     
@@ -185,7 +183,7 @@ def main(args):
             buffer.seek(0)
             image = Image.open(buffer)
             image_array = np.array(image)
-            wandb.log({"Small Confusion Matrix": wandb.Image(image_array)})
+            wandb.log({"Confusion Matrix": wandb.Image(image_array)})
             plt.close()
             file_path = os.path.join(directory, "model.onnx")
             wandb.save(file_path, directory)
