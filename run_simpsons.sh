@@ -29,8 +29,6 @@ echo "DATASET: $dataset"
 echo "MODEL: $model"
 echo "TASK: $task"
 echo "NOTE: $note"
-
-
 # Run the command
 CUDA_VISIBLE_DEVICES=0,1,2,3 WORLD_SIZE=$NPROC_PER_NODE python3 -m torch.distributed.launch --nproc_per_node=$NPROC_PER_NODE --nnodes=$NNODES --master_addr=$MASTER_ADDR --master_port=$MASTER_PORT \
     --use_env running.py \
