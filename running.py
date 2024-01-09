@@ -232,7 +232,7 @@ if __name__ == '__main__':
     parser.add_argument('--dataset', type=str)
     parser.add_argument('--note', type=str)
     parser.add_argument('--version', type=str)
-    parser.add_argument('--task', type=str, required=True, choices=['vqa-wo-ans'])
+    parser.add_argument('--task', type=str, required=True, choices=['vqa-wo-unans'])
     parser.add_argument('--debug', action='store_true')
     parser.add_argument('--wandb', action='store_true')
     parser.add_argument('--wandb_dir', type=str, help="for fine-tuning")
