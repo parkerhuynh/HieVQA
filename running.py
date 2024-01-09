@@ -125,7 +125,7 @@ def main(args):
         
         max_epoch = args.schedular['epochs']
         if args.debug:
-            max_epoch = 100
+            max_epoch = 200
             val_loader = train_loader
         start_epoch = 0
         best_acc = 0
@@ -194,7 +194,7 @@ def main(args):
             conf_matrix_normalized = conf_matrix.astype('float') / conf_matrix.sum(axis=1)[:, np.newaxis]
 
             # Plotting the normalized confusion matrix
-            plt.figure(figsize=(10, 8))
+            plt.figure(figsize=(20, 16))
             sns.heatmap(conf_matrix_normalized, annot=True, fmt='.2f', xticklabels=y_true.unique(), yticklabels=y_true.unique(), cmap='Blues')
             plt.title(f'{args.task}-{args.version}-{args.version}-{args.dataset}-{args.task}-{args.created}')
             plt.xlabel('Predicted Type')
