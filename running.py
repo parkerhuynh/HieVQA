@@ -138,7 +138,7 @@ def main(args):
                 train_loader.sampler.set_epoch(epoch)
             train_stats = trainer(model, train_loader, optimizer, loss_fn, epoch, device, lr_scheduler, args, wandb)
             
-            validation_stats, val_accuraciess, val_prediction_csv_i = validator(model, val_loader, device, loss_fn, args)
+            validation_stats, val_accuraciess, val_prediction_csv_i = validator(model, val_loader, device, loss_fn, args, epoch)
 
             if args.wandb:
                 wandb_train_log = {**{f'train_{k}': float(v) for k, v in train_stats.items()},
