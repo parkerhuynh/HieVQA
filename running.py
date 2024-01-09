@@ -132,7 +132,6 @@ def main(args):
             val_loader = train_loader
         start_epoch = 0
         best_acc = 0
-        val_prediction_csv = None
         if is_main_process():
             print(model)
         for epoch in range(start_epoch, max_epoch):
@@ -159,34 +158,34 @@ def main(args):
                 torch.save(model_without_ddp, last_model_path)
                 
                 if val_accuraciess['val_accuracy_vqa'] > best_acc:
-                    
+                    val_prediction_csv.to_csv("prediction.csv", index=False)
+                    directory = os.getcwd()
+                    file_path = os.path.join(directory, "prediction.csv")
+                    wandb.save(file_path, directory)
                     best_acc = val_accuraciess['val_accuracy_vqa']
                     best_model_path = os.path.join(args.output_dir, "best_model_state.pt")
                     torch.save(model_without_ddp, best_model_path)
                     
+                    
+                    y_true = val_prediction_csv['small_answer_type_target']
+                    y_pred = val_prediction_csv['small_answer_type_prediction']
+                    conf_matrix = confusion_matrix(y_true, y_pred, labels=y_true.unique())
+
+                    plt.figure(figsize=(10, 8))
+                    sns.heatmap(conf_matrix, annot=True, fmt='d', xticklabels=y_true.unique(), yticklabels=y_true.unique(), cmap='Blues')
+                    plt.title('Confusion Matrix')
+                    plt.xlabel('Predicted Label')
+                    plt.ylabel('True Label')
+                    buffer = BytesIO()
+                    plt.savefig(buffer, format='png')
+                    buffer.seek(0)
+                    image = Image.open(buffer)
+                    image_array = np.array(image)
+                    wandb.log({"Confusion Matrix": wandb.Image(image_array)})
+                    plt.close()
             print("\n")
         if is_main_process() and args.wandb:
-            val_prediction_csv.to_csv("prediction.csv", index=False)
             directory = os.getcwd()
-            file_path = os.path.join(directory, "prediction.csv")
-            wandb.save(file_path, directory)
-            
-            y_true = val_prediction_csv['small_answer_type_target']
-            y_pred = val_prediction_csv['small_answer_type_prediction']
-            conf_matrix = confusion_matrix(y_true, y_pred, labels=y_true.unique())
-
-            plt.figure(figsize=(10, 8))
-            sns.heatmap(conf_matrix, annot=True, fmt='d', xticklabels=y_true.unique(), yticklabels=y_true.unique(), cmap='Blues')
-            plt.title('Confusion Matrix')
-            plt.xlabel('Predicted Label')
-            plt.ylabel('True Label')
-            buffer = BytesIO()
-            plt.savefig(buffer, format='png')
-            buffer.seek(0)
-            image = Image.open(buffer)
-            image_array = np.array(image)
-            wandb.log({"Small Confusion Matrix": wandb.Image(image_array)})
-            plt.close()
             file_path = os.path.join(directory, "model.onnx")
             wandb.save(file_path, directory)
             

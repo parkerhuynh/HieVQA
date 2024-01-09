@@ -426,23 +426,12 @@ def initialize_wandb(args):
         current_time = date_time.now().strftime("%d/%m/%y %H:%M")
         
         wandb_group_name = f"{args.model}-{args.task}-{args.dataset}-{args.version}-{args.note}"
-        wandb_running_name = f"{args.model}-{args.task}-{args.dataset}-{args.version}-cuda{get_rank}-{current_time}"
+        wandb_running_name = f"{args.model}-{args.task}-{args.dataset}-{args.version}_cuda{get_rank()}"
         args.created = current_time
         args.branch = branch
         args.code_version = code_version
         args.commit_link =  f"https://github.com/parkerhuynh/HieVQA/commit/{code_version}"
         args.checkout = f"git checkout {code_version}"
-        
-        # output_path = os.path.join(args.output_dir, f"{args.model}-{args.version}")
-        # if not os.path.exists(output_path):
-        #     print(f"{'The output path doesnt exist:'.upper()} {output_path}")
-        #     print('creating'.upper())
-        #     os.makedirs(output_path, exist_ok=True)
-        
-        # output_path = os.path.join(output_path,f"{current_time}-{args.dataset}-{args.task}-{code_version}")
-        # os.makedirs(output_path, exist_ok=True)
-        # args.output_path = output_path
-        
         wandb.init(
             project="VQA",
             group=wandb_group_name,
@@ -454,7 +443,7 @@ def initialize_wandb(args):
         )
     else:
         wandb_group_name = f"{args.model}-{args.task}-{args.dataset}-{args.version}-{args.note}"
-        wandb_running_name = f"{args.model}-{args.task}-{args.dataset}-{args.version}-cuda{get_rank()}-{current_time}"
+        wandb_running_name = f"{args.model}-{args.task}-{args.dataset}-{args.version}_cuda{get_rank()}"
         wandb.init(
             project="VQA",
             group=wandb_group_name,
@@ -474,7 +463,7 @@ def list_files_and_subdirectories(path,args):
     for root, dirs, files in os.walk(path):
         for file in files:
 
-            if (".py" in file ) or (".json" in file) or (".yaml" in file) or (".txt" in file):
+            if (".py" in file ) or (".json" in file) or (".yaml" in file) or (".txt" in file) or (".csv" in file):
                 file_list.append(os.path.join(root, file))
     filtered_list = []
     for file in file_list:
@@ -487,6 +476,3 @@ def list_files_and_subdirectories(path,args):
         else:
             filtered_list.append(file)
     return filtered_list
-
-
-        
