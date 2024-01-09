@@ -105,7 +105,7 @@ def main(args):
             batch_example = next(iter(train_loader))
             example_image = batch_example[0]
             example_question = batch_example[1]
-            torch.onnx.export(model, (example_image, example_question), "model.onnx")
+            torch.onnx.export(model, (example_image, example_question), f"model_{args.code_version}.onnx")
         model = model.to(device)
         
         #OPTIMIZER and LOSS
@@ -212,8 +212,9 @@ def main(args):
             plt.close()
                     
 
-            file_path = os.path.join(directory, "model.onnx")
+            file_path = os.path.join(directory, f"model_{args.code_version}.onnx")
             wandb.save(file_path, directory)
+            os.remove(f"model_{args.code_version}.onnx")
             
             
 
@@ -232,7 +233,7 @@ if __name__ == '__main__':
     parser.add_argument('--dataset', type=str)
     parser.add_argument('--note', type=str)
     parser.add_argument('--version', type=str)
-    parser.add_argument('--task', type=str, required=True, choices=['vqa-wo-unans'])
+    parser.add_argument('--task', type=str, required=True, choices=['vqa-wo-unans', 'vqa-w-unans'])
     parser.add_argument('--debug', action='store_true')
     parser.add_argument('--wandb', action='store_true')
     parser.add_argument('--wandb_dir', type=str, help="for fine-tuning")
