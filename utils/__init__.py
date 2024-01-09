@@ -433,7 +433,15 @@ def initialize_wandb(args):
         args.commit_link =  f"https://github.com/parkerhuynh/HieVQA/commit/{code_version}"
         args.checkout = f"git checkout {code_version}"
         
-
+        # output_path = os.path.join(args.output_dir, f"{args.model}-{args.version}")
+        # if not os.path.exists(output_path):
+        #     print(f"{'The output path doesnt exist:'.upper()} {output_path}")
+        #     print('creating'.upper())
+        #     os.makedirs(output_path, exist_ok=True)
+        
+        # output_path = os.path.join(output_path,f"{current_time}-{args.dataset}-{args.task}-{code_version}")
+        # os.makedirs(output_path, exist_ok=True)
+        # args.output_path = output_path
         
         wandb.init(
             project="VQA",
