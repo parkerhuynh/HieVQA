@@ -36,6 +36,7 @@ import numpy as np
 import hiddenlayer as hl
 
 
+
 def main(args):
     print()
     # Initialize the distributed computing environment and other settings
@@ -103,12 +104,17 @@ def main(args):
         args.optimizer['lr'] = float(args.optimizer['lr'])
         args.schedular['lr'] = float(args.schedular['lr'])
         model = get_model(args, train_dataset)
+        def forward_wrapper(x):
+            # Unpack the tuple into two inputs
+            input1, input2 = x
+            # Forward pass through the model
+            return model(input1, input2)
         if is_main_process() and args.wandb:
             # model = model.eval()
             batch_example = next(iter(train_loader))
             example_image = batch_example[0]
             example_question = batch_example[1]
-            hl_graph = hl.build_graph(model, (example_image, example_question))
+            hl_graph = hl.build_graph(forward_wrapper, (example_image, example_question))
             hl_graph.save('./model_visualization.png')
             wandb.log({"Model Visualization": wandb.Image('./model_visualization.png')})
         model = model.to(device)
