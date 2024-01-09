@@ -38,7 +38,6 @@ def trainer(model, data_loader, optimizer, loss_function, epoch, device, schedul
 
 @torch.no_grad()
 def validator(model, data_loader, device, loss_function, args):
-    
     print()
     model.eval()
     print_freq = args.print_freq

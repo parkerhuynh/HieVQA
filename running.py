@@ -163,9 +163,6 @@ def main(args):
                     best_model_path = os.path.join(args.output_dir, "best_model_state.pt")
                     torch.save(model_without_ddp, best_model_path)
                     
-                    
-                    
-                    
             print("\n")
         if is_main_process() and args.wandb:
             
@@ -190,6 +187,29 @@ def main(args):
             image = Image.open(buffer)
             image_array = np.array(image)
             wandb.log({"Confusion Matrix": wandb.Image(image_array)})
+            plt.close()
+            
+            conf_matrix = confusion_matrix(y_true, y_pred, labels=y_true.unique())
+
+            # Normalize the confusion matrix
+            conf_matrix_normalized = conf_matrix.astype('float') / conf_matrix.sum(axis=1)[:, np.newaxis]
+
+            # Plotting the normalized confusion matrix
+            plt.figure(figsize=(10, 8))
+            sns.heatmap(conf_matrix_normalized, annot=True, fmt='.2f', xticklabels=y_true.unique(), yticklabels=y_true.unique(), cmap='Blues')
+            plt.title(f'{args.task}-{args.version}-{args.version}-{args.dataset}-{args.task}-{args.created}')
+            plt.xlabel('Predicted Type')
+            plt.ylabel('True Type')
+
+            # Save the plot to a buffer for wandb
+            buffer = BytesIO()
+            plt.savefig(buffer, format='png')
+            buffer.seek(0)
+            image = Image.open(buffer)
+            image_array = np.array(image)
+
+            # Log the normalized confusion matrix image to wandb
+            wandb.log({"Normalized Confusion Matrix": wandb.Image(image_array)})
             plt.close()
                     
 
