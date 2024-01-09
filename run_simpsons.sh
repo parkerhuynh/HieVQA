@@ -41,6 +41,7 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 WORLD_SIZE=$NPROC_PER_NODE python3 -m torch.distrib
     --bs "$bs" \
     --bs_test "$bs_test" \
     --version "$version" \
-    --wandb
+    --wandb \
+    --debug
     
     
