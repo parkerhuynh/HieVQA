@@ -439,7 +439,7 @@ def initialize_wandb(args):
             print('creating'.upper())
             os.makedirs(output_path, exist_ok=True)
         
-        output_path = os.path.join(output_path, current_time, f"{args.dataset}-{args.dataset}-{args.task}-{code_version}")
+        output_path = os.path.join(output_path,f"{current_time}-{args.dataset}-{args.task}-{code_version}")
         os.makedirs(output_path, exist_ok=True)
         args.output_path = output_path
         
