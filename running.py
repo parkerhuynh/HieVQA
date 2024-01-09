@@ -33,7 +33,7 @@ from sklearn.metrics import confusion_matrix
 from io import BytesIO
 from PIL import Image
 import numpy as np
-from torchviz import make_dot
+import hiddenlayer as hl
 
 
 def main(args):
@@ -108,11 +108,9 @@ def main(args):
             batch_example = next(iter(train_loader))
             example_image = batch_example[0]
             example_question = batch_example[1]
-            output = model(example_image, example_question)
-            dot = make_dot(output, params=dict(model.named_parameters()))
-            dot.format = 'png'
-            dot.render('model_visualization', cleanup=True)
-            wandb.log({"Model Visualization": wandb.Image('model_visualization.png')})
+            hl_graph = hl.build_graph(model, (example_image, example_question))
+            hl_graph.save('./model_visualization.png')
+            wandb.log({"Model Visualization": wandb.Image('./model_visualization.png')})
         model = model.to(device)
         
         #OPTIMIZER and LOSS
