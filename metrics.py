@@ -15,7 +15,7 @@ def calculate_vqa_accuracy(result_data):
     # Preparing to save accuracies with specified key names
     
     formatted_accuracies = {
-        f'val_{lqt.lower().replace("/","_")}_accuracy': accuracy for lqt, accuracy in accuracies.items()
+        f'val_{lqt.lower().replace("/","_")}_accuracy(wo-ans)': accuracy for lqt, accuracy in accuracies.items()
     }
     overall_correct_predictions = ((result_data['prediction'] == result_data['target'])).sum()
     total_instances = len(result_data)
