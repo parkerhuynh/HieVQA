@@ -33,8 +33,7 @@ from sklearn.metrics import confusion_matrix
 from io import BytesIO
 from PIL import Image
 import numpy as np
-import hiddenlayer as hl
-
+import torch.onnx
 
 
 def main(args):
@@ -104,20 +103,11 @@ def main(args):
         args.optimizer['lr'] = float(args.optimizer['lr'])
         args.schedular['lr'] = float(args.schedular['lr'])
         model = get_model(args, train_dataset)
-        def forward_wrapper(x):
-            # Unpack the tuple into two inputs
-            print(example_image, example_question)
-            input1, input2 = x
-            # Forward pass through the model
-            return model(input1, input2)
         if is_main_process() and args.wandb:
-            # model = model.eval()
-            batch_example = next(iter(train_loader))
-            example_image = batch_example[0]
-            example_question = batch_example[1]
-            hl_graph = hl.build_graph(forward_wrapper, (example_image, example_question))
-            hl_graph.save('./model_visualization.png')
-            wandb.log({"Model Visualization": wandb.Image('./model_visualization.png')})
+            model = model.eval()
+            example_image = train_dataset[0][0]
+            example_question = train_dataset[0][1]
+            torch.onnx.export(model, (example_image, example_question), "model.onnx")
         model = model.to(device)
         
         #OPTIMIZER and LOSS
@@ -193,8 +183,11 @@ def main(args):
                     wandb.log({"Confusion Matrix": wandb.Image(image_array)})
                     plt.close()
             print("\n")
-        if is_main_process():
-            wandb.finish()
+        if is_main_process() and args.wandb:
+            directory = os.getcwd()
+            file_path = os.path.join(directory, "model.onnx")
+            wandb.save(file_path, directory)
+            
             
 
 
