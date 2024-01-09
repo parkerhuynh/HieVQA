@@ -33,7 +33,7 @@ from sklearn.metrics import confusion_matrix
 from io import BytesIO
 from PIL import Image
 import numpy as np
-import torch.onnx
+from torchviz import make_dot
 
 
 def main(args):
@@ -104,11 +104,15 @@ def main(args):
         args.schedular['lr'] = float(args.schedular['lr'])
         model = get_model(args, train_dataset)
         if is_main_process() and args.wandb:
-            model = model.eval()
+            # model = model.eval()
             batch_example = next(iter(train_loader))
             example_image = batch_example[0]
             example_question = batch_example[1]
-            torch.onnx.export(model, (example_image, example_question), "model.onnx")
+            output = model(example_image, example_question)
+            dot = make_dot(output, params=dict(model.named_parameters()))
+            dot.format = 'png'
+            dot.render('model_visualization', cleanup=True)
+            wandb.log({"Model Visualization": wandb.Image('model_visualization.png')})
         model = model.to(device)
         
         #OPTIMIZER and LOSS
