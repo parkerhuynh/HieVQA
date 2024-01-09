@@ -106,6 +106,7 @@ def main(args):
         model = get_model(args, train_dataset)
         def forward_wrapper(x):
             # Unpack the tuple into two inputs
+            print(example_image, example_question)
             input1, input2 = x
             # Forward pass through the model
             return model(input1, input2)
