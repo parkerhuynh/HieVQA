@@ -412,11 +412,13 @@ def initialize_wandb(args):
         tags=[args.model, args.task, args.dataset, args.version]
     current_time = date_time.now().strftime("%d/%m/%y %H:%M")
     if is_main_process():
+        with open("./PAT.txt", "r") as file:
+            pat = file.read().strip()
         branch = f"{args.model}/{args.task}/{args.version}/{args.dataset}"
         message = args.note
         os.system(f'git config --global user.email "dunghuynh110496@gmail.com"')
         os.system(f'git config --global user.name "parkerhuynh"')
-        os.system(f"git remote set-url origin https://parkerhuynh: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@github.com/parkerhuynh/HieVQA.git")
+        os.system(f"git remote set-url origin https://parkerhuynh:{pat}@github.com/parkerhuynh/HieVQA.git")
         os.system(f"git fetch --all")
         
         
