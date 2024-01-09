@@ -156,9 +156,9 @@ def main(args):
                 last_model_path = os.path.join(args.output_dir, "model_latest_epoch.pt")
                 torch.save(model_without_ddp, last_model_path)
                 
-                if val_accuraciess['val_accuracy_vqa'] > best_acc:
+                if val_accuraciess['val_accuracy_vqa(vqa-wo-unans)'] > best_acc:
                     
-                    best_acc = val_accuraciess['val_accuracy_vqa']
+                    best_acc = val_accuraciess['val_accuracy_vqa(vqa-wo-unans)']
                     best_model_path = os.path.join(args.output_dir, "best_model_state.pt")
                     torch.save(model_without_ddp, best_model_path)
                     
@@ -232,7 +232,7 @@ if __name__ == '__main__':
     parser.add_argument('--dataset', type=str)
     parser.add_argument('--note', type=str)
     parser.add_argument('--version', type=str)
-    parser.add_argument('--task', type=str, required=True, choices=['vqa-wo-ans'])
+    parser.add_argument('--task', type=str, required=True, choices=['vqa-wo-unans'])
     parser.add_argument('--debug', action='store_true')
     parser.add_argument('--wandb', action='store_true')
     parser.add_argument('--wandb_dir', type=str, help="for fine-tuning")
