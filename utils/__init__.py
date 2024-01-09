@@ -416,13 +416,15 @@ def initialize_wandb(args):
         message = args.note
         os.system(f'git config --global user.email "dunghuynh110496@gmail.com"')
         os.system(f'git config --global user.name "parkerhuynh"')
+        os.system(f"git remote set-url origin https://parkerhuynh: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@github.com/parkerhuynh/HieVQA.git")
         
         branch_exists = os.system(f"git rev-parse --verify {branch}")
         if branch_exists != 0:
             os.system(f"git branch {branch}")
         os.system(f"git checkout {branch}")
         os.system(f"git commit -am \"{message}\"")
-        os.system(f"git remote set-url origin https://parkerhuynh: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@github.com/parkerhuynh/HieVQA.git")
+        
+        os.system(f"git push --set-upstream origin {branch}")
         code_version = os.popen('git rev-parse HEAD').read().strip()
         
         args.created = current_time

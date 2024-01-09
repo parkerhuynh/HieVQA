@@ -16,6 +16,7 @@ version="v1"
 bs=32
 bs_test=32
 
+
 # Print system information
 echo "=========== System Information ==========="
 echo "NNODES: $NNODES"
