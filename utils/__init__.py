@@ -422,10 +422,7 @@ def initialize_wandb(args):
             os.system(f"git branch {branch}")
         os.system(f"git checkout {branch}")
         os.system(f"git commit -am \"{message}\"")
-        if branch_exists != 0:
-            os.system(f"git push --set-upstream origin {branch}")
-        else:
-            os.system("git push")
+        os.system(f"git remote --set-url origin https://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@github.com/parkerhuynh/HieVQA")
         code_version = os.popen('git rev-parse HEAD').read().strip()
         
         
