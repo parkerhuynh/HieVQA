@@ -37,7 +37,7 @@ def trainer(model, data_loader, optimizer, loss_function, epoch, device, schedul
     
 
 @torch.no_grad()
-def validator(model, data_loader, device, loss_function, args):
+def validator(model, data_loader, device, loss_function, args, epoch):
     print()
     model.eval()
     print_freq = args.print_freq
@@ -89,7 +89,7 @@ def validator(model, data_loader, device, loss_function, args):
         val_prediction_csv = pd.DataFrame(val_prediction_csv)
         val_accuracies, val_prediction_csv = calculate_accuracies(val_prediction_csv, data_loader.dataset)
         
-        
+        val_accuracies["epoch"] = epoch
         if args.wandb:
             wandb.log(val_accuracies)
     metric_logger.synchronize_between_processes()
