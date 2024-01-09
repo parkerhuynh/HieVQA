@@ -170,6 +170,7 @@ def main(args):
         if is_main_process() and args.wandb:
             
             val_prediction_csv.to_csv("prediction.csv", index=False)
+            val_prediction_csv = val_prediction_csv.sort_values(by='id')
             directory = os.getcwd()
             file_path = os.path.join(directory, "prediction.csv")
             wandb.save(file_path, directory)
@@ -194,6 +195,8 @@ def main(args):
 
             file_path = os.path.join(directory, "model.onnx")
             wandb.save(file_path, directory)
+            table = wandb.Table(dataframe=val_prediction_csv)
+            wandb.log({"My Data Table": table})
             
             
 
