@@ -40,6 +40,8 @@ def main(args):
     print()
     # Initialize the distributed computing environment and other settings
     device, world_size = setup_environment(args)
+    if is_main_process() and args.wandb:
+        args.output_dir = output_path_create(args)
     if args.bs > 0:
         args.batch_size_train = int(float(args.bs)/world_size)
     
