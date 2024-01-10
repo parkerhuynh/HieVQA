@@ -234,12 +234,13 @@ def main(args):
             
             
             
-            val_prediction_csv = val_prediction_csv[val_prediction_csv["target class"] !="unanswerable"]
+            val_prediction_csv = val_prediction_csv[val_prediction_csv["small_answer_type_target"] !="unanswerable"]
             y_true = val_prediction_csv['small_answer_type_target']
-            y_true = y_true.append(pd.Series(["unanswerable"]), ignore_index=True)
-            
             y_pred = val_prediction_csv['small_answer_type_prediction']
-            y_pred = y_pred.append(pd.Series(["unanswerable"]), ignore_index=True)
+            
+            # new_item = pd.Series(["unanswerable"])
+            # y_true = pd.concat([y_true, new_item], ignore_index=True)
+            # y_pred = pd.concat([y_pred, new_item], ignore_index=True)
             
             conf_matrix = confusion_matrix(y_true, y_pred, labels=y_pred.unique())
             conf_matrix_normalized = conf_matrix.astype('float') / conf_matrix.sum(axis=1)[:, np.newaxis]
