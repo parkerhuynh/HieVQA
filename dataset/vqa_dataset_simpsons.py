@@ -114,7 +114,7 @@ class VQADataset(Dataset):
     
     def __len__(self):
         if self.args.debug:
-            return self.args.batch_size_train*2
+            return self.args.batch_size_train*4
         return len(self.annotations)
     
     
