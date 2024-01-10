@@ -242,7 +242,7 @@ def main(args):
             y_true = pd.concat([y_true, new_item], ignore_index=True)
             y_pred = pd.concat([y_pred, new_item], ignore_index=True)
             
-            conf_matrix = confusion_matrix(y_true, y_pred, labels=y_pred.unique())
+            conf_matrix = confusion_matrix(y_true, y_pred, labels=y_true.unique())
             conf_matrix_normalized = conf_matrix.astype('float') / conf_matrix.sum(axis=1)[:, np.newaxis]
             plt.figure(figsize=(30, 12))
             plt.subplot(1, 2, 1)
