@@ -198,7 +198,7 @@ def main(args):
             buffer.seek(0)
             image = Image.open(buffer)
             image_array = np.array(image)
-            wandb.log({"Confusion Matrix": wandb.Image(image_array)})
+            wandb.log({"Confusion Matrix (With Unanswerable)": wandb.Image(image_array)})
             plt.close()
             
             
@@ -260,7 +260,7 @@ def main(args):
             buffer.seek(0)
             image = Image.open(buffer)
             image_array = np.array(image)
-            wandb.log({"Confusion Matrix (With Unanswerable)": wandb.Image(image_array)})
+            wandb.log({"Confusion Matrix": wandb.Image(image_array)})
             plt.close()
                     
             directory = os.getcwd()
