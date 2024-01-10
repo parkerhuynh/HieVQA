@@ -37,7 +37,7 @@ def calculate_vqa_accuracy(result_data):
     
     report_dict = classification_report(result_data["birary answerable prediction"], result_data["birary answerable tartget"], output_dict=True)
     unanswerable_resuslt = {
-        "val_valanswerable_recall": report_dict["answerable"]["recall"],
+        "val_answerable_recall": report_dict["answerable"]["recall"],
         "val_unanswerable_recall": report_dict["unanswerable"]["recall"],
         "val_answerable_precision": report_dict["answerable"]["precision"],
         "val_unanswerable_precision": report_dict["unanswerable"]["precision"]
