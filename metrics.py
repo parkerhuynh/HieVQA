@@ -1,7 +1,7 @@
 from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
 import json
 import pandas as pd
-
+from sklearn.metrics import classification_report
 def calculate_vqa_accuracy(result_data):
     
     
