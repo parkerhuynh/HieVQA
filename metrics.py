@@ -19,7 +19,7 @@ def calculate_vqa_accuracy(result_data):
     ###########################################################
     accuracies = {}
     for lqt in result_data['answer_type'].unique():
-        df_lqt = result_data[result_data['processed_answer_type'] == lqt]
+        df_lqt = result_data[result_data['answer_type'] == lqt]
         correct_predictions = ((df_lqt['prediction'] == df_lqt['target'])).sum()
         total_instances = len(df_lqt)
         accuracies[lqt] = correct_predictions / total_instances if total_instances > 0 else 0
@@ -37,18 +37,18 @@ def calculate_vqa_accuracy(result_data):
     
     report_dict = classification_report(result_data["birary answerable prediction"], result_data["birary answerable tartget"], output_dict=True)
     unanswerable_resuslt = {
-        "answerable_recall": report_dict["answerable"]["recall"],
-        "unanswerable_recall": report_dict["unanswerable"]["recall"],
-        "answerable_precision": report_dict["answerable"]["precision"],
-        "unanswerable_precision": report_dict["unanswerable"]["precision"]
+        "val_valanswerable_recall": report_dict["answerable"]["recall"],
+        "val_unanswerable_recall": report_dict["unanswerable"]["recall"],
+        "val_answerable_precision": report_dict["answerable"]["precision"],
+        "val_unanswerable_precision": report_dict["unanswerable"]["precision"]
     }
     formatted_accuracies.update(unanswerable_resuslt)
     ###########################################################
     
     result_data = result_data[result_data["processed_answer_type"] !="unanswerable"]
     accuracies = {}
-    for lqt in result_data['processed_answer_type'].unique():
-        df_lqt = result_data[result_data['processed_answer_type'] == lqt]
+    for lqt in result_data['answer_type'].unique():
+        df_lqt = result_data[result_data['answer_type'] == lqt]
         correct_predictions = ((df_lqt['prediction'] == df_lqt['target'])).sum()
         total_instances = len(df_lqt)
         accuracies[lqt] = correct_predictions / total_instances if total_instances > 0 else 0
@@ -58,20 +58,6 @@ def calculate_vqa_accuracy(result_data):
     }
     formatted_accuracies.update(formatted_accuracies_2)
     ###########################################################
-    result_data = result_data[result_data["processed_answer_type"] !="unanswerable"]
-    accuracies = {}
-    for lqt in result_data['processed_answer_type'].unique():
-        df_lqt = result_data[result_data['processed_answer_type'] == lqt]
-        correct_predictions = ((df_lqt['prediction'] == df_lqt['target'])).sum()
-        total_instances = len(df_lqt)
-        accuracies[lqt] = correct_predictions / total_instances if total_instances > 0 else 0
-    
-    formatted_accuracies_2 = {
-        f'val_{lqt.lower().replace("/","_")}_accuracy(vqa-wo-unans)': accuracy for lqt, accuracy in accuracies.items()
-    }
-    formatted_accuracies.update(formatted_accuracies_2)
-    ###########################################################
-
     
     overall_correct_predictions = ((result_data['prediction'] == result_data['target'])).sum()
     total_instances = len(result_data)
