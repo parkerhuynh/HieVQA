@@ -23,8 +23,13 @@ def calculate_vqa_accuracy(result_data):
     formatted_accuracies.update({"val_accuracy_vqa(vqa-w-unans)":vqa_accuracy})
     
     report_dict = classification_report(result_data["birary answerable prediction"], result_data["birary answerable tartget"], output_dict=True)
-
-    formatted_accuracies.update(report_dict)
+    unanswerable_resuslt = {
+        "answerable_recall": report_dict["answerable"]["recall"],
+        "unanswerable_recall": report_dict["unanswerable"]["recall"],
+        "answerable_precision": report_dict["answerable"]["precision"],
+        "unanswerable_precision": report_dict["unanswerable"]["precision"]
+    }
+    formatted_accuracies.update(unanswerable_resuslt)
     
     result_data = result_data[result_data["target class"] !="unanswerable"]
     for lqt in result_data['answer_type'].unique():
