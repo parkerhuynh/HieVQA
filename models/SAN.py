@@ -91,17 +91,11 @@ class SAN(nn.Module):
             batch_first=True)
         
         self.san = nn.ModuleList([Attention(d=args.model_config["image_feature_output"], k=args.model_config["att_ff_size"])] * args.model_config["num_att_layers"])
-        if args.task in ["cvqa", "mergevqa"]:
-            self.mlp = VQA_header(args, ans_vocab_size)
-        elif args.task in ["qrvqa"]:
-            self.mlp = QR_header(args)
-        elif args.task in ['acvqa']:
-            self.answer_encoder = AnswerEncoder(
-                answer_vocal_size = ans_vocab_size,
-                word_embedding_size = args.model_config["word_embedding"],
-                hidden_size = args.model_config["rnn_hidden_size"]
-                )
-            self.mlp = AC_header(args)
+        self.mlp = nn.Sequential(
+                nn.Linear(args.model_config["image_feature_output"], 1000),
+                nn.Dropout(p=0.5),
+                nn.Tanh(),
+                nn.Linear(1000, ans_vocab_size))
 
     def forward(self, images, questions):
 

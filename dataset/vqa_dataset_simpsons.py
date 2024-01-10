@@ -114,7 +114,7 @@ class VQADataset(Dataset):
     
     def __len__(self):
         if self.args.debug:
-            return self.args.batch_size_train*2
+            return self.args.batch_size_train*4
         return len(self.annotations)
     
     
@@ -152,7 +152,12 @@ def annotation_preprocessing( anns):
             if judge["answer"] == 1:
                 ans_count += 1
         if ans_count >= 2:
-            ann["question_label"]= 1
             ann["answer"] = prep_ans(ann["answer"])
+            ann["processed_answer_type"] = ann["answer_type"]
             proccesed_anns.append(ann)
+        elif ann["overall_scores"]["question"] < 0.5:
+            ann["answer"] = "unanswerable"
+            ann["processed_answer_type"] = "unanswerable"
+            proccesed_anns.append(ann)
+            
     return proccesed_anns

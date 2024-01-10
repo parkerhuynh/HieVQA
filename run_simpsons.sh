@@ -10,8 +10,8 @@ data_path="/home/reda/scratch/ngoc/data/simpsonsvqa"
 dataset="simpsonsvqa"
 model="VQA"
 output_dir="/home/reda/scratch/ngoc/code/HieVQA/results"
-task=vqa-wo-unans # vqa-w-ans & vqa-hie
-note="vqa"
+task=vqa-w-unans # vqa-w-ans & vqa-hie
+note="VQA With Unans"
 version="v1"
 bs=256
 bs_test=256
@@ -42,5 +42,3 @@ CUDA_VISIBLE_DEVICES=0,1,2,3 WORLD_SIZE=$NPROC_PER_NODE python3 -m torch.distrib
     --bs_test "$bs_test" \
     --version "$version" \
     --wandb
-    
-    
