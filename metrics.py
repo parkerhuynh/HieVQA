@@ -4,23 +4,36 @@ import pandas as pd
 from sklearn.metrics import classification_report
 def calculate_vqa_accuracy(result_data):
     
-    
+    ###########################################################
     accuracies = {}
-    for lqt in result_data['answer_type'].unique():
-        df_lqt = result_data[result_data['answer_type'] == lqt]
+    for lqt in result_data['processed_answer_type'].unique():
+        df_lqt = result_data[result_data['processed_answer_type'] == lqt]
         correct_predictions = ((df_lqt['prediction'] == df_lqt['target'])).sum()
         total_instances = len(df_lqt)
         accuracies[lqt] = correct_predictions / total_instances if total_instances > 0 else 0
     
-    # Preparing to save accuracies with specified key names
     
     formatted_accuracies = {
         f'val_{lqt.lower().replace("/","_")}_accuracy(vqa-w-unans)': accuracy for lqt, accuracy in accuracies.items()
     }
+    ###########################################################
+    accuracies = {}
+    for lqt in result_data['answer_type'].unique():
+        df_lqt = result_data[result_data['processed_answer_type'] == lqt]
+        correct_predictions = ((df_lqt['prediction'] == df_lqt['target'])).sum()
+        total_instances = len(df_lqt)
+        accuracies[lqt] = correct_predictions / total_instances if total_instances > 0 else 0
+    formatted_accuracies_1 = {
+        f'val_{lqt.lower().replace("/","_")}_accuracy(vqa-w-unans, origin)': accuracy for lqt, accuracy in accuracies.items()
+    }
+    formatted_accuracies.update(formatted_accuracies_1)
+    ###########################################################
+    
     overall_correct_predictions = ((result_data['prediction'] == result_data['target'])).sum()
     total_instances = len(result_data)
     vqa_accuracy = overall_correct_predictions / total_instances if total_instances > 0 else 0
     formatted_accuracies.update({"val_accuracy_vqa(vqa-w-unans)":vqa_accuracy})
+    ###########################################################
     
     report_dict = classification_report(result_data["birary answerable prediction"], result_data["birary answerable tartget"], output_dict=True)
     unanswerable_resuslt = {
@@ -30,20 +43,36 @@ def calculate_vqa_accuracy(result_data):
         "unanswerable_precision": report_dict["unanswerable"]["precision"]
     }
     formatted_accuracies.update(unanswerable_resuslt)
+    ###########################################################
     
-    result_data = result_data[result_data["target class"] !="unanswerable"]
-    for lqt in result_data['answer_type'].unique():
-        df_lqt = result_data[result_data['answer_type'] == lqt]
+    result_data = result_data[result_data["processed_answer_type"] !="unanswerable"]
+    accuracies = {}
+    for lqt in result_data['processed_answer_type'].unique():
+        df_lqt = result_data[result_data['processed_answer_type'] == lqt]
         correct_predictions = ((df_lqt['prediction'] == df_lqt['target'])).sum()
         total_instances = len(df_lqt)
         accuracies[lqt] = correct_predictions / total_instances if total_instances > 0 else 0
-    
-    # Preparing to save accuracies with specified key names
     
     formatted_accuracies_2 = {
         f'val_{lqt.lower().replace("/","_")}_accuracy(vqa-wo-unans)': accuracy for lqt, accuracy in accuracies.items()
     }
     formatted_accuracies.update(formatted_accuracies_2)
+    ###########################################################
+    result_data = result_data[result_data["processed_answer_type"] !="unanswerable"]
+    accuracies = {}
+    for lqt in result_data['processed_answer_type'].unique():
+        df_lqt = result_data[result_data['processed_answer_type'] == lqt]
+        correct_predictions = ((df_lqt['prediction'] == df_lqt['target'])).sum()
+        total_instances = len(df_lqt)
+        accuracies[lqt] = correct_predictions / total_instances if total_instances > 0 else 0
+    
+    formatted_accuracies_2 = {
+        f'val_{lqt.lower().replace("/","_")}_accuracy(vqa-wo-unans)': accuracy for lqt, accuracy in accuracies.items()
+    }
+    formatted_accuracies.update(formatted_accuracies_2)
+    ###########################################################
+
+    
     overall_correct_predictions = ((result_data['prediction'] == result_data['target'])).sum()
     total_instances = len(result_data)
     vqa_accuracy = overall_correct_predictions / total_instances if total_instances > 0 else 0
