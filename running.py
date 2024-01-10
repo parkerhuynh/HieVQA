@@ -235,8 +235,8 @@ def main(args):
             
             
             val_prediction_csv = val_prediction_csv[val_prediction_csv["target class"] !="unanswerable"]
-            y_true = list(val_prediction_csv['small_answer_type_target'])
-            y_pred = list(val_prediction_csv['small_answer_type_prediction'])
+            y_true = val_prediction_csv['small_answer_type_target'].to_list()
+            y_pred = val_prediction_csv['small_answer_type_prediction'].to_list()
             conf_matrix = confusion_matrix(y_true, y_pred, labels=y_pred.unique())
             conf_matrix_normalized = conf_matrix.astype('float') / conf_matrix.sum(axis=1)[:, np.newaxis]
             plt.figure(figsize=(30, 12))
