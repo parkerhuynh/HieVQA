@@ -21,6 +21,7 @@ def calculate_vqa_accuracy(result_data):
     total_instances = len(result_data)
     vqa_accuracy = overall_correct_predictions / total_instances if total_instances > 0 else 0
     formatted_accuracies.update({"val_accuracy_vqa(vqa-w-unans)":vqa_accuracy})
+    
 
     result_data = result_data[result_data["target class"] !="unanswerable"]
     for lqt in result_data['answer_type'].unique():
@@ -40,7 +41,9 @@ def calculate_vqa_accuracy(result_data):
     vqa_accuracy = overall_correct_predictions / total_instances if total_instances > 0 else 0
     formatted_accuracies.update({"val_accuracy_vqa(vqa-wo-unans)":vqa_accuracy})
 
-    
+    report_dict = classification_report(df["birary answerable prediction"], df["birary answerable tartget"], output_dict=True)
+
+    formatted_accuracies.update(report_dict)
     return formatted_accuracies
 
 def calculate_accuracies(df, dataset):
