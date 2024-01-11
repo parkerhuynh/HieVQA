@@ -9,19 +9,20 @@ from models.VQAHieVQA import VQAHieVQA
 def get_model(args, train_dataset):
     if args.model == "VQA":
         if "hie" in args.task:
-            print("CREATING VQA MODEL")
-            model = VQA(
-                args = args,
-                question_vocab_size = train_dataset.token_size,
-                ans_vocab_size = train_dataset.ans_size)
-            return model
-        else:           
             print("CREATING HieVQA")
             model = VQAHieVQA(
                 question_vocab_size = train_dataset.token_size,
                 ans_vocab_type_dict = train_dataset.ans_to_ix,
                 idx_to_answer_type = train_dataset.idx_to_answer_type, 
                 args = args)
+            return model
+
+        else:
+            print("CREATING VQA MODEL")
+            model = VQA(
+                args = args,
+                question_vocab_size = train_dataset.token_size,
+                ans_vocab_size = train_dataset.ans_size)
             return model
         
     elif args.model == "SAN":
