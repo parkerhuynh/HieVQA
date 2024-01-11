@@ -137,7 +137,7 @@ class SANHieVQA(nn.Module):
             word_embedding_size=args.model_config["word_embedding"],
             hidden_size=args.model_config["rnn_hidden_size"])
         
-        self.vqa_mlp = VQA_header(args, ans_vocab_type_dict)
+        self.vqa_mlp = VQA_header(ans_vocab_type_dict)
     
         self.question_type_mlp = QuestionType(args, idx_to_answer_type)
         self.san = nn.ModuleList([Ques_Ans_Attention(self.args, args.model_config["image_feature_output"], 512)] * args.model_config["num_att_layers"])
