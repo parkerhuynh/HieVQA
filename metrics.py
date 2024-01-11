@@ -46,5 +46,5 @@ def calculate_accuracies(df, dataset):
 
 def convert_process(answer_type, ans_idx, dataset):
     idx_to_ans = dataset.ix_to_ans[answer_type]
-    answer = idx_to_ans[ans_idx]
+    answer = idx_to_ans[str(ans_idx)]
     return answer
