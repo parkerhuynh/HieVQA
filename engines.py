@@ -94,38 +94,41 @@ def validator(model, data_loader, device, loss_function, args, epoch):
     vqa_predictions_tensor = torch.cat(total_vqa_predictions, dim=0).to(device)
     qt_targets_tensor = torch.cat(total_qt_targets, dim=0)
     vqa_targets_tensor = torch.cat(total_vqa_targets, dim=0)
-    print(qt_predictions_tensor)
-    print(vqa_predictions_tensor)
-    print(qt_targets_tensor)
-    print(vqa_targets_tensor)
     
-    tensors_to_gather = [question_ids_tensor, predictions_tensor, targets_tensor]
+    tensors_to_gather = [question_ids_tensor, qt_predictions_tensor, vqa_predictions_tensor, qt_targets_tensor, vqa_targets_tensor]
     
     if dist.get_rank() == 0:
         gathered_question_ids = [torch.empty_like(question_ids_tensor) for _ in range(dist.get_world_size())]
-        gathered_predictions = [torch.empty_like(predictions_tensor) for _ in range(dist.get_world_size())]
-        gathered_targets = [torch.empty_like(targets_tensor) for _ in range(dist.get_world_size())]
+        gathered_qt_predictions = [torch.empty_like(qt_predictions_tensor) for _ in range(dist.get_world_size())]
+        gathered_vqa_predictions = [torch.empty_like(vqa_predictions_tensor) for _ in range(dist.get_world_size())]
+        gathered_qt_target = [torch.empty_like(qt_targets_tensor) for _ in range(dist.get_world_size())]
+        gathered_vqa_target = [torch.empty_like(vqa_targets_tensor) for _ in range(dist.get_world_size())]
     else:
-        gathered_question_ids = gathered_predictions = gathered_targets = None
+        gathered_question_ids = gathered_qt_predictions = gathered_vqa_predictions = gathered_qt_target = gathered_vqa_target= None
 
     # Gather the tensors
-    for tensor, gathered in zip(tensors_to_gather, [gathered_question_ids, gathered_predictions, gathered_targets]):
+    for tensor, gathered in zip(tensors_to_gather, [gathered_question_ids, gathered_qt_predictions, gathered_vqa_predictions, gathered_qt_target, gathered_vqa_target]):
         dist.gather(tensor, gather_list=gathered, dst=0)
 
     # Concatenate the results on the master process
     if dist.get_rank() == 0:
         final_question_ids = torch.cat(gathered_question_ids, dim=0).cpu().tolist()
-        final_predictions = torch.cat(gathered_predictions, dim=0).cpu().tolist()
-        final_targets = torch.cat(gathered_targets, dim=0).cpu().tolist()
+        final_qt_predictions = torch.cat(gathered_qt_predictions, dim=0).cpu().tolist()
+        final_vqa_predictions = torch.cat(gathered_vqa_predictions, dim=0).cpu().tolist()
+        final_qt_targets = torch.cat(gathered_qt_target, dim=0).cpu().tolist()
+        final_vqa_targets = torch.cat(gathered_vqa_target, dim=0).cpu().tolist()
     
         val_prediction_csv = {
             "id": final_question_ids,
-            "prediction": final_predictions,
-            "target":final_targets
+            "prediction": final_vqa_predictions,
+            "target":final_vqa_targets,
+            "answer_type": final_vqa_targets,
+            "answer_type_prediction": final_qt_predictions,
+            
         }
         val_prediction_csv = pd.DataFrame(val_prediction_csv)
-        val_accuracies, val_prediction_csv = calculate_accuracies(val_prediction_csv, data_loader.dataset)
         
+        val_accuracies, val_prediction_csv = calculate_accuracies(val_prediction_csv, data_loader.dataset)
         val_accuracies["epoch"] = epoch
         if args.wandb:
             wandb.log(val_accuracies)
@@ -138,6 +141,9 @@ def validator(model, data_loader, device, loss_function, args, epoch):
     return result, [], []
         
     
+    
+def convert_process(answer_type, ans_idx, dataset):
+    idx_to_ans = dataset, 
     
     
 
