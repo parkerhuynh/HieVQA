@@ -124,14 +124,12 @@ class VQADataset(Dataset):
         """
         # question = rnn_proc_ques(ques["question"], self.token_to_ix, self.args.max_ques_len)
         question=  torch.from_numpy(ques["question"])
-        if self.split != 'test':
-            return image, question, ann["answer_idx"], ann['answer'], ann['id']
-        else:
-            return image, question, ques['id']
+        
+        return image, question, ann["answer_idx"], ann['answer'], ann['id']
     
     def __getitem__(self, index):
         
-        if self.split in ['train', 'val'] or self.args.task == "acvqa":
+        if self.split in ['train', 'val']:
             ann = self.annotations[index]
             ques = self.questions[str(ann["id"])]
         else:
