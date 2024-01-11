@@ -80,7 +80,7 @@ class VQA_header(nn.Module):
     A Visual Question Answering (VQA) header module.
     """
 
-    def __init__(self,args, ans_vocab_type_dict, idx_to_answer_type):
+    def __init__(self, ans_vocab_type_dict):
         super().__init__()
 
         # ModuleDict for VQA headers
@@ -90,17 +90,8 @@ class VQA_header(nn.Module):
                 nn.Dropout(p=0.5),
                 nn.Tanh(),
                 nn.Linear(1000, len(ans_vocab_type_dict[answer_type]))
-            ).cuda() for answer_type in ans_vocab_type_dict.keys()
+            ) for answer_type in ans_vocab_type_dict.keys()
         })
-        number_classes = []
-        for answer_type in ans_vocab_type_dict.keys():
-            number_classes.append(len(ans_vocab_type_dict[answer_type]))
-        self.max_number_answer = max(number_classes)
-        self.vqa_loss_func = torch.nn.CrossEntropyLoss()
-
-        # Mapping from question type index to string key
-        self.question_type_dict = idx_to_answer_type
-
     def forward(self, hidden_states):
         results = {}
         for question_category in self.vqa_headers.keys():
@@ -123,10 +114,8 @@ class VQAHieVQA(nn.Module):
             word_embedding_size=args.model_config["word_embedding"],
             hidden_size=args.model_config["rnn_hidden_size"])
         
-        self.vqa_mlp = VQA_header(args, ans_vocab_type_dict, idx_to_answer_type)
-    
-        self.questiont_type_mlp = QuestionType(args, idx_to_answer_type)
-        self.qt_loss_func = torch.nn.CrossEntropyLoss()
+        self.vqa_mlp = VQA_header(args, ans_vocab_type_dict)
+        self.question_type_mlp = QuestionType(args, idx_to_answer_type)
     def debug_print(self, message):
         """
         Prints debug information if debug mode is enabled.
@@ -139,6 +128,6 @@ class VQAHieVQA(nn.Module):
         question = self.word_embeddings(question)
         question = self.question_encoder(question)
         combine_features = image*question
-        question_type_output = self.questiont_type_mlp(combine_features)
+        question_type_output = self.question_type_mlp(combine_features)
         vqa_outputs =  self.vqa_mlp(combine_features)
         return question_type_output, vqa_outputs
