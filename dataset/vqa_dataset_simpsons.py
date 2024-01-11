@@ -27,7 +27,13 @@ class VQADataset(Dataset):
         self.token_to_ix, self.pretrained_emb, self.token_size = self.prepare_question_vocab()
         self.ans_to_ix, self.ix_to_ans = self.prepare_answer_vocab()
         self.ans_size = len(self.ans_to_ix)
+        self.ans_type_to_idx = {}
+        self.idx_to_ans_type = {}
         
+        for i, ans_type in enumerate(self.ans_to_ix.key()):
+            self.ans_type_to_idx[ans_type] = i
+            self.idx_to_ans_type[i] = ans_type
+            
         self.questions = self.load_questions()
         self.annotations, self.idx_to_ann  = self.load_annotations() if split != 'test' else ([], [])
         
@@ -80,8 +86,16 @@ class VQADataset(Dataset):
         processed_ann = []
         for ann in annotations:
             idx_to_ann[ann["id"]] = ann
-            answer_str_qt = ann["answer"]
-            ann["answer_idx"] = self.ans_to_ix[answer_str_qt]
+            
+            at_str = ann["answer_type"]
+            ans_str = ann["answer"]
+            ans_to_idx_dict = self.ans_to_ix[at_str]
+            
+            at_idx = self.ans_type_to_idx[at_str]
+            ans_idx = ans_to_idx_dict[ans_str]
+            
+            ann["answer_type_idx"] = at_idx
+            ann["answer_idx"] = ans_idx
             processed_ann.append(ann)
         return processed_ann, idx_to_ann
 
@@ -124,8 +138,10 @@ class VQADataset(Dataset):
         """
         # question = rnn_proc_ques(ques["question"], self.token_to_ix, self.args.max_ques_len)
         question=  torch.from_numpy(ques["question"])
-        
-        return image, question, ann["answer_idx"], ann['answer'], ann['id']
+        print(ques)
+        print(ann)
+        print(ann["answer_idx"], ann['answer_type_idx'], ann['id'])
+        return image, question, ann["answer_idx"], ann['answer_type_idx'], ann['id']
     
     def __getitem__(self, index):
         

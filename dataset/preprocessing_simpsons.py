@@ -151,53 +151,23 @@ def prep_ans(answer):
     answer = answer.replace(',', '')
     return answer
 
-def ans_stat(stat_ans_list, max_frequency):
-    ans_to_ix = {}
-    ix_to_ans = {}
-    ans_freq_dict = {}
-
-    for ans in stat_ans_list:
-        ans_proc = prep_ans(ans['answer'])
-        if ans_proc not in ans_freq_dict:
-            ans_freq_dict[ans_proc] = 1
-        else:
-            ans_freq_dict[ans_proc] += 1
-    ans_freq_filter = ans_freq_dict.copy()
-    for ans in ans_freq_dict:
-        if ans_freq_dict[ans] <= max_frequency:
-            ans_freq_filter.pop(ans)
-
-    for ans in ans_freq_filter:
-        ix_to_ans[ans_to_ix.__len__()] = ans
-        ans_to_ix[ans] = ans_to_ix.__len__()
-    
-    return ans_to_ix, ix_to_ans
 
 def create_ann_vocal(examples, args):
-    counts = {}
+    ans2tok, tok2ans = {}, {}
+    id = {}
+    
     for ex in examples:
-        try:
-            ans = prep_ans(ex['multiple_choice_answer'])
-        except:
-            ans = prep_ans(ex['answer'])
-        counts[ans] = counts.get(ans, 0) + 1
-
-    cw = sorted([(count,w) for w,count in counts.items()], reverse=True)
-    tok2ans = {}
-    ans2tok = {}
-    max_freq = 0
-    idx = 0
-     
-    if args.data_config['top_answers'] > len(counts):
-        max_freq = len(counts)
-    else:
-        max_freq = args.data_config['top_answers'] 
-        
-    for i in range(max_freq):
-        answer = cw[i][1]
-        ans2tok[answer] =  idx
-        tok2ans[idx] = answer
-        idx += 1
+        ans_str = ex["answer"]
+        ans_type = ex["answer_type"]
+        if ans_type not in ans2tok:
+            ans2tok[ans_type] = {}
+            tok2ans[ans_type] = {}
+            id[ans_type] = 0
+        if ans_str not in ans2tok[ans_type]:
+            id_i = id[ans_type]
+            ans2tok[ans_type][ans_str] = id_i
+            tok2ans[ans_type][id_i] = ans_str
+            id[ans_type] += 1
     return ans2tok, tok2ans 
 
 
