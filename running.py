@@ -34,6 +34,7 @@ from io import BytesIO
 from PIL import Image
 import numpy as np
 import torch.onnx
+from loss import HierarchicalLoss
 
 
 def main(args):
@@ -114,7 +115,7 @@ def main(args):
         arg_sche = AttrDict(args.schedular)
         arg_sche['step_per_epoch'] = math.ceil(train_dataset_size / (args.batch_size_train * world_size))
         lr_scheduler = create_scheduler(arg_sche, optimizer)
-        loss_fn =  torch.nn.CrossEntropyLoss()
+        loss_fn =  HierarchicalLoss(args, train_dataset)
 
         # lr_scheduler = None
         # optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
