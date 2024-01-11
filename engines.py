@@ -62,7 +62,7 @@ def validator(model, data_loader, device, loss_function, args, epoch):
     
     for i, (images, questions, answers, answer_type, question_ids) in enumerate(metric_logger.log_every(data_loader, print_freq, 'Validation:')):
         with torch.no_grad():
-            images, questions, answers, answer_type= images.to(device), questions.to(device), answers.to(device), answer_type.to(device)
+            images, questions, answers, answer_type, question_ids = images.to(device), questions.to(device), answers.to(device), answer_type.to(device), question_ids.to(device)
             qt_output, vqa_outputs = model(images, questions)
             qt_loss, vqa_loss, total_loss = loss_function(qt_output, answer_type, vqa_outputs, answers)
             metric_logger.update(vqa_loss=vqa_loss.item())
@@ -90,7 +90,6 @@ def validator(model, data_loader, device, loss_function, args, epoch):
     # total_vqa_predictions = torch.tensor(total_vqa_predictions)
     # print(total_vqa_predictions)
     question_ids_tensor = torch.cat(total_question_ids, dim=0)
-    print(question_ids_tensor)
     qt_predictions_tensor = torch.cat(total_qt_predictions, dim=0)
     vqa_predictions_tensor = torch.cat(total_vqa_predictions, dim=0).to(device)
     qt_targets_tensor = torch.cat(total_qt_targets, dim=0)
