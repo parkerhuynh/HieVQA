@@ -13,7 +13,7 @@ def get_model(args, train_dataset):
             model = VQAHieVQA(
                 question_vocab_size = train_dataset.token_size,
                 ans_vocab_type_dict = train_dataset.ans_to_ix,
-                idx_to_answer_type = train_dataset.idx_to_answer_type, 
+                idx_to_answer_type = train_dataset.idx_to_ans_type, 
                 args = args)
             return model
 
