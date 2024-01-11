@@ -81,7 +81,7 @@ def validator(model, data_loader, device, loss_function, args, epoch):
                 qt_str = data_loader.dataset.idx_to_ans_type[qt_idx]
                 vqa_output_at = vqa_outputs[qt_str]
                 _, vqa_output_at  = torch.max(vqa_output_at, 1)
-                pred_i = vqa_output_at[i]
+                pred_i = vqa_output_at[i].item()
                 vqa_predictions.append(pred_i)
                 
             total_vqa_predictions.append(vqa_predictions)
