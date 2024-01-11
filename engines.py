@@ -71,21 +71,22 @@ def validator(model, data_loader, device, loss_function, args, epoch):
             
             
             total_question_ids.append(question_ids)
+            total_qt_targets.append(answer_type)
+            total_vqa_targets.append(answers)
             
             _, qt_predictions  = torch.max(qt_output, 1)
-            qt_predictions = qt_predictions.cpu().tolist()
             total_qt_predictions.append(qt_predictions)
-            total_qt_targets.append(answer_type.cpu().tolist())
-            
-            
-            
-        
-            
-            
-            for i, question_type_id in enumerate(qt_predicted_classes):
-            
-            targets.append(answers)
-            
+            vqa_predictions = []
+            for i, qt_idx in enumerate(qt_predictions.cpu().list()):
+                qt_str = data_loader.dataset.idx_to_ans_type[qt_idx]
+                vqa_output_at = vqa_outputs[qt_str]
+                _, vqa_output_at  = torch.max(vqa_output_at, 1)
+                pred_i = vqa_output_at[i]
+                vqa_predictions.append(pred_i)
+                
+            total_vqa_predictions.append(vqa_predictions)
+    print(total_vqa_predictions)
+    print(total_qt_predictions)
     question_ids_tensor = torch.cat(question_ids, dim=0)
     predictions_tensor = torch.cat(predictions, dim=0)
     targets_tensor = torch.cat(targets, dim=0)
