@@ -10,24 +10,28 @@ import torch.distributed as dist
 def trainer(model, data_loader, optimizer, loss_function, epoch, device, scheduler, args, wandb):
     model.train()
     metric_logger = MetricLogger(delimiter="  ")
-    metric_logger.add_meter('vqa_loss', SmoothedValue(window_size=1, fmt='{value:.6f}'))    
+    metric_logger.add_meter('vqa_loss', SmoothedValue(window_size=1, fmt='{value:.6f}'))
+    metric_logger.add_meter('qt_loss', SmoothedValue(window_size=1, fmt='{value:.6f}'))
+    metric_logger.add_meter('total_loss', SmoothedValue(window_size=1, fmt='{value:.6f}'))
     header = f'Train Epoch: [{epoch}]'
     print_freq = args.print_freq
     
-    for i, (images, questions, answers, answer_str, question_id) in enumerate(metric_logger.log_every(data_loader, print_freq, header)):
+    for i, (images, questions, answers, answer_type, question_id) in enumerate(metric_logger.log_every(data_loader, print_freq, header)):
     
         images, questions, answers= images.to(device), questions.to(device), answers.to(device)
-        vqa_outputs = model(images, questions)
+        qt_output, vqa_outputs = model(images, questions)
 
-        vqa_loss = loss_function(vqa_outputs, answers)
+        qt_loss, vqa_loss, total_loss = loss_function(qt_output, answer_type, vqa_outputs, answers)
         
         optimizer.zero_grad()
-        vqa_loss.backward()
+        total_loss.backward()
         optimizer.step()
         scheduler.step()
         if args.wandb:
             wandb.log({"train_vqa_loss_iter": vqa_loss.item()})
         metric_logger.update(vqa_loss=vqa_loss)
+        metric_logger.update(qt_loss=qt_loss)
+        metric_logger.update(total_loss=total_loss)
         metric_logger.update(lr=optimizer.param_groups[0]["lr"])
     metric_logger.synchronize_between_processes()
     print("Averaged stats:", metric_logger.global_avg())
