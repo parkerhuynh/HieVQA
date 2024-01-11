@@ -218,7 +218,56 @@ def main(args):
             
             # Close the plot
             plt.close()
+            
+            
+            
+            y_true = val_prediction_csv['answer_type']
+            y_pred = val_prediction_csv['answer_type_prediction']
+            conf_matrix = confusion_matrix(y_true, y_pred, labels=y_true.unique())
+            
+            # Normalize the confusion matrix
+            conf_matrix_normalized = conf_matrix.astype('float') / conf_matrix.sum(axis=1)[:, np.newaxis]
+            
+            # Set up the matplotlib figure for side-by-side plots
+            plt.figure(figsize=(30, 12))
+            
+            # Regular confusion matrix
+            plt.subplot(1, 2, 1)
+            sns.heatmap(conf_matrix, annot=True, fmt='d', 
+                        xticklabels=y_true.unique(), yticklabels=y_true.unique(), 
+                        cmap='Blues')
+            plt.title('Confusion Matrix')
+            plt.xlabel('Predicted Type')
+            plt.ylabel('True Type')
+            
+            # Normalized confusion matrix
+            plt.subplot(1, 2, 2)
+            sns.heatmap(conf_matrix_normalized, annot=True, fmt='.2f', 
+                        xticklabels=y_true.unique(), yticklabels=y_true.unique(), 
+                        cmap='Blues')
+            plt.title('Normalized Confusion Matrix')
+            plt.xlabel('Predicted Type')
+            plt.ylabel('True Type')
+            
+            # Main title
+            plt.suptitle(f'{args.task}-{args.version}-{args.version}-{args.dataset}-{args.task}-{args.created}')
+            
+            # Save the plot to a buffer
+            buffer = BytesIO()
+            plt.savefig(buffer, format='png')
+            buffer.seek(0)
+            image = Image.open(buffer)
+            image_array = np.array(image)
+            
+            # Log the image to wandb
+            wandb.log({"Confusion Matrix (3 types)": wandb.Image(image_array)})
+            
+            # Close the plot
+            plt.close()
                     
+            directory = os.getcwd()
+            file_path = os.path.join(directory, f"model_{args.code_version}.onnx")
+            wandb.save(file_path, directory)
             directory = os.getcwd()
             file_path = os.path.join(directory, f"model_{args.code_version}.onnx")
             wandb.save(file_path, directory)
