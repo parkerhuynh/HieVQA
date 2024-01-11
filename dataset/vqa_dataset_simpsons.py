@@ -30,7 +30,7 @@ class VQADataset(Dataset):
         self.ans_type_to_idx = {}
         self.idx_to_ans_type = {}
         
-        for i, ans_type in enumerate(self.ans_to_ix.key()):
+        for i, ans_type in enumerate(self.ans_to_ix.keys()):
             self.ans_type_to_idx[ans_type] = i
             self.idx_to_ans_type[i] = ans_type
             
