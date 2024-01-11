@@ -86,7 +86,7 @@ def validator(model, data_loader, device, loss_function, args, epoch):
                 
             total_vqa_predictions.append(vqa_predictions)
     
-    question_ids_tensor = torch.cat(question_ids, dim=0)
+    question_ids_tensor = torch.cat(total_question_ids, dim=0)
     qt_predictions_tensor = torch.cat(total_qt_predictions, dim=0)
     vqa_predictions_tensor = torch.cat(total_vqa_predictions, dim=0)
     qt_targets_tensor = torch.cat(total_qt_targets, dim=0)
