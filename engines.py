@@ -96,7 +96,6 @@ def validator(model, data_loader, device, loss_function, args, epoch):
     vqa_targets_tensor = torch.cat(total_vqa_targets, dim=0)
     
     tensors_to_gather = [question_ids_tensor, qt_predictions_tensor, vqa_predictions_tensor, qt_targets_tensor, vqa_targets_tensor]
-    print(tensors_to_gather)
     if dist.get_rank() == 0:
         gathered_question_ids = [torch.empty_like(question_ids_tensor) for _ in range(dist.get_world_size())]
         gathered_qt_predictions = [torch.empty_like(qt_predictions_tensor) for _ in range(dist.get_world_size())]
