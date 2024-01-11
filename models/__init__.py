@@ -55,7 +55,7 @@ def get_model(args, train_dataset):
             ans_vocab_type_dict = train_dataset.ans_to_ix,
             idx_to_answer_type = train_dataset.idx_to_answer_type, 
             args = args)
-    elif args.model == "VQA-HieVQA":
+    elif args.model == "VQA" and "hie" in args.task:
         print("CREATING HieVQA")
         model = VQAHieVQA(
             question_vocab_size = train_dataset.token_size,

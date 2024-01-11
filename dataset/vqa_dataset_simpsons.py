@@ -137,10 +137,10 @@ class VQADataset(Dataset):
         Prepare the vocabulary for answer processing in the dataset.
         """
         # question = rnn_proc_ques(ques["question"], self.token_to_ix, self.args.max_ques_len)
-        question=  torch.from_numpy(ques["question"])
-        print(ques)
-        print(ann)
-        print(ann["answer_idx"], ann['answer_type_idx'], ann['id'])
+        # question=  torch.from_numpy(ques["question"])
+        # print(ques)
+        # print(ann)
+        # print(ann["answer_idx"], ann['answer_type_idx'], ann['id'])
         return image, question, ann["answer_idx"], ann['answer_type_idx'], ann['id']
     
     def __getitem__(self, index):
