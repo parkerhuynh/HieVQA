@@ -114,7 +114,7 @@ class VQAHieVQA(nn.Module):
             word_embedding_size=args.model_config["word_embedding"],
             hidden_size=args.model_config["rnn_hidden_size"])
         
-        self.vqa_mlp = VQA_header(args, ans_vocab_type_dict)
+        self.vqa_mlp = VQA_header(ans_vocab_type_dict)
         self.question_type_mlp = QuestionType(args, idx_to_answer_type)
     def debug_print(self, message):
         """
