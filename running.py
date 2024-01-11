@@ -128,7 +128,7 @@ def main(args):
         max_epoch = args.schedular['epochs']
         if args.debug:
             max_epoch = 3
-            val_loader = train_loader
+            # val_loader = train_loader
         start_epoch = 0
         best_acc = 0
         val_prediction_csv = None
