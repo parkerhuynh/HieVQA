@@ -47,19 +47,43 @@ def validator(model, data_loader, device, loss_function, args, epoch):
     print_freq = args.print_freq
     metric_logger = MetricLogger(delimiter="  ")
     metric_logger.add_meter('vqa_loss', SmoothedValue(window_size=1, fmt='{value:.6f}'))
-    question_ids = []
-    predictions = []
-    targets = []
-    for i, (images, questions, answers, answer_str, question_id) in enumerate(metric_logger.log_every(data_loader, print_freq, 'Validation:')):
+    metric_logger.add_meter('qt_loss', SmoothedValue(window_size=1, fmt='{value:.6f}'))
+    metric_logger.add_meter('total_loss', SmoothedValue(window_size=1, fmt='{value:.6f}'))
+    
+    total_question_ids = []
+    total_qt_predictions = []
+    total_qt_targets = []
+    
+    total_vqa_predictions = []
+    total_vqa_targets = []
+    
+    
+    
+    
+    for i, (images, questions, answers, answer_type, question_ids) in enumerate(metric_logger.log_every(data_loader, print_freq, 'Validation:')):
         with torch.no_grad():
-            images, questions, answers, question_id= images.to(device), questions.to(device), answers.to(device), question_id.to(device)
-            vqa_outputs = model(images, questions)
-            vqa_loss = loss_function(vqa_outputs, answers)
+            images, questions, answers, answer_type= images.to(device), questions.to(device), answers.to(device), answer_type.to(device)
+            qt_output, vqa_outputs = model(images, questions)
+            qt_loss, vqa_loss, total_loss = loss_function(qt_output, answer_type, vqa_outputs, answers)
             metric_logger.update(vqa_loss=vqa_loss.item())
-            _, vqa_predicted  = torch.max(vqa_outputs, 1)
+            metric_logger.update(qt_loss=qt_loss)
+            metric_logger.update(total_loss=total_loss)
             
-            question_ids.append(question_id)
-            predictions.append(vqa_predicted)
+            
+            total_question_ids.append(question_ids)
+            
+            _, qt_predictions  = torch.max(qt_output, 1)
+            qt_predictions = qt_predictions.cpu().tolist()
+            total_qt_predictions.append(qt_predictions)
+            total_qt_targets.append(answer_type.cpu().tolist())
+            
+            
+            
+        
+            
+            
+            for i, question_type_id in enumerate(qt_predicted_classes):
+            
             targets.append(answers)
             
     question_ids_tensor = torch.cat(question_ids, dim=0)
