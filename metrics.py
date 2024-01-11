@@ -31,8 +31,8 @@ def calculate_accuracies(df, dataset):
     df["answer_type"] = df["answer_type"].map(dataset.idx_to_ans_type)
     df["answer_type_prediction"] = df["answer_type_prediction"].map(dataset.idx_to_ans_type)
     
-    df["target class"] = df[["answer_type", "target"]].apply(lambda x: convert_process(x["answer_type"], x["target"], dataset))
-    df["prediction class"] = df[["answer_type_prediction", "prediction"]].apply(lambda x: convert_process(x["answer_type_prediction"], x["prediction"], dataset))
+    df["target class"] = df[["answer_type", "target"]].apply(lambda x: convert_process(x["answer_type"], x["target"], dataset), axis =1)
+    df["prediction class"] = df[["answer_type_prediction", "prediction"]].apply(lambda x: convert_process(x["answer_type_prediction"], x["prediction"], dataset),  axis =1)
     
     # df["prediction class"] = df["prediction"].apply(lambda x: dataset.ix_to_ans[str(x)])
     # df["target class"] = df["target"].apply(lambda x: dataset.ix_to_ans[str(x)])
