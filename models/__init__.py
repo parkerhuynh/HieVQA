@@ -27,10 +27,20 @@ def get_model(args, train_dataset):
         
     elif args.model == "SAN":
         print("CREATING SAN MODEL")
-        model = SAN(
-            question_vocab_size = train_dataset.token_size,
-            ans_vocab_size = train_dataset.ans_size, 
-            args = args)
+        if "hie" in args.task:
+            print("CREATING HieVQA")
+            model = SANHieVQA(
+                question_vocab_size = train_dataset.token_size,
+                ans_vocab_type_dict = train_dataset.ans_to_ix,
+                idx_to_answer_type = train_dataset.idx_to_ans_type, 
+                args = args)
+            return model
+        else:
+            model = SAN(
+                question_vocab_size = train_dataset.token_size,
+                ans_vocab_size = train_dataset.ans_size, 
+                args = args)
+            return model
         
     elif args.model == "MutanAtt":
         print("CREATING MUTAN MODEL WITH ATTENTION")
