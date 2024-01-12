@@ -41,11 +41,15 @@ class VQA_Trainer:
             # total_loss.backward()
             if not self.stop_active:
                 qt_loss.backward(retain_graph=True)
+            else:
+                print("#"*200)
+                print("#"*200)
+                print("Ignite the question type loss ")
             for vqa_loss_i in vqa_losses.values():
                 vqa_loss_i.backward(retain_graph=True)
             self.optimizer.step()
             self.scheduler.step()
-            if self.args.wandb and not args.debug:
+            if self.args.wandb and not self.args.debug:
                 wandb.log({"train_vqa_loss_iter": vqa_loss.item()})
             metric_logger.update(vqa_loss=vqa_loss)
             metric_logger.update(qt_loss=qt_loss)
@@ -88,6 +92,7 @@ class VQA_Trainer:
                     self.stop_early_epoch += 1
                     if self.stop_early_epoch == 5:
                         self.stop_active = True
+                        
                 total_question_ids.append(question_ids)
                 total_qt_targets.append(answer_type)
                 total_vqa_targets.append(answers)
@@ -147,7 +152,7 @@ class VQA_Trainer:
             
             val_accuracies, val_prediction_csv = calculate_accuracies(val_prediction_csv, data_loader.dataset)
             val_accuracies["epoch"] = epoch
-            if self.args.wandb and  not args.debug:
+            if self.args.wandb and  not self.args.debug:
                 wandb.log(val_accuracies)
         metric_logger.synchronize_between_processes()
         print(f"Averaged stats: {metric_logger.global_avg()}")

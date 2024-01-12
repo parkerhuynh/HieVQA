@@ -381,11 +381,17 @@ def init_distributed_mode(args):
 
 
 
-def load_configuration(model_name, dataset_name):
+def load_configuration(args, model_name, dataset_name):
     """Load configuration files for the model and dataset."""
     model_config = yaml.safe_load(open(f'./configs/models/{model_name}.yaml'))
     data_config = yaml.safe_load(open(f'./configs/data/{dataset_name}.yaml'))
-    training_config = yaml.safe_load(open(f'./configs/training.yaml'))
+    if args.debug:
+        training_config = yaml.safe_load(open(f'./configs/training-debug.yaml'))
+    else:
+        training_config = yaml.safe_load(open(f'./configs/training.yaml'))
+        
+        
+    
     return model_config, data_config, training_config
 
 def setup_environment(args):

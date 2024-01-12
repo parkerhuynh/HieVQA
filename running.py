@@ -47,12 +47,12 @@ def main(args):
     if args.bs_test > 0:
         args.batch_size_test = int(float(args.bs_test)/world_size)
     # Initialize WandB for experiment tracking, if enabled.
-    if args.wandb and args.debug:
+    if args.wandb and  not args.debug:
         initialize_wandb(args)
     
     # Create datasets for training, validation, or testing.
     # Handles both distributed and non-distributed data handling.
-    if args.wandb and is_main_process() and args.debug:
+    if args.wandb and is_main_process() and  not args.debug:
         directory = os.getcwd()
         file_list = list_files_and_subdirectories(directory, args)
         for filename in file_list:
@@ -102,7 +102,7 @@ def main(args):
         args.optimizer['lr'] = float(args.optimizer['lr'])
         args.schedular['lr'] = float(args.schedular['lr'])
         model = get_model(args, train_dataset)
-        if is_main_process() and args.wandb:
+        if is_main_process() and args.wandb and not args.debug:
             model = model.to(device)
             batch_example = next(iter(train_loader))
             example_image = batch_example[0].to(device)
@@ -128,8 +128,8 @@ def main(args):
         vqa_trainer = VQA_Trainer(model, loss_fn, optimizer, lr_scheduler, device, args)
         max_epoch = args.schedular['epochs']
         if args.debug:
-            max_epoch = 3
-            # val_loader = train_loader
+            max_epoch = 400
+            val_loader = train_loader
         start_epoch = 0
         best_acc = 0
         val_prediction_csv = None
@@ -143,7 +143,7 @@ def main(args):
             
             validation_stats, val_accuraciess, val_prediction_csv_i = vqa_trainer.validator(val_loader, epoch)
     
-            if args.wandb and args.debug:
+            if args.wandb and  not args.debug:
                 wandb_train_log = {**{f'train_{k}': float(v) for k, v in train_stats.items()},
                                 'epoch': epoch}
                 wandb_val_log = {**{f'val_{k}': float(v) for k, v in validation_stats.items()}}
@@ -151,7 +151,7 @@ def main(args):
                 wandb.log(wandb_train_log)
 
 
-            if is_main_process() and args.wandb and args.debug:
+            if is_main_process() and args.wandb and not args.debug:
                 if hasattr(model, 'module'):
                     model_without_ddp = model.module
                 #Save model
@@ -168,7 +168,7 @@ def main(args):
                     torch.save(model_without_ddp, best_model_path)
                     
             print("\n")
-        if is_main_process() and args.wandb and args.debug:
+        if is_main_process() and args.wandb and  not args.debug:
             
             val_prediction_csv.to_csv("prediction.csv", index=False)
             val_prediction_csv = val_prediction_csv.sort_values(by='id')
@@ -304,7 +304,7 @@ if __name__ == '__main__':
         raise FileNotFoundError(f"The data path {args.data_path} does not exist")
     
     #Load Config
-    model_config, data_config, training_config = load_configuration(args.model, args.dataset)
+    model_config, data_config, training_config = load_configuration(args, args.model, args.dataset)
     args.model_config = model_config
     args.data_config = data_config
     vars(args).update(training_config)
