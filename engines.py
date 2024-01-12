@@ -101,7 +101,7 @@ class VQA_Trainer:
         # print(total_vqa_predictions)
         question_ids_tensor = torch.cat(total_question_ids, dim=0)
         qt_predictions_tensor = torch.cat(total_qt_predictions, dim=0)
-        vqa_predictions_tensor = torch.cat(total_vqa_predictions, dim=0).to(device)
+        vqa_predictions_tensor = torch.cat(total_vqa_predictions, dim=0).to(self.device)
         qt_targets_tensor = torch.cat(total_qt_targets, dim=0)
         vqa_targets_tensor = torch.cat(total_vqa_targets, dim=0)
         
