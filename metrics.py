@@ -54,7 +54,7 @@ def calculate_vqa_accuracy(result_data):
     overall_correct_predictions = ((result_data['answer_type'] == result_data['answer_type_prediction'])).sum()
     total_instances = len(result_data)
     small_qt_accracy = overall_correct_predictions / total_instances if total_instances > 0 else 0
-    formatted_accuracies.update({"large_qt_accracy(vqa-w-unans, origien)":small_qt_accracy})
+    formatted_accuracies.update({"large_qt_accracy(vqa-w-unans, originn)":small_qt_accracy})
 
     overall_correct_predictions = ((result_data['processed_answer_type'] == result_data['processed_answer_type_prediction'])).sum()
     total_instances = len(result_data)
@@ -85,8 +85,19 @@ def calculate_vqa_accuracy(result_data):
     small_qt_accracy = overall_correct_predictions / total_instances if total_instances > 0 else 0
     formatted_accuracies.update({"small_qt_accracy(vqa-wo-unans)":small_qt_accracy})
     ###########################################################
+
+    overall_correct_predictions = ((result_data['small_answer_type_target'] == result_data['small_answer_type_prediction'])).sum()
+    total_instances = len(result_data)
+    small_qt_accracy = overall_correct_predictions / total_instances if total_instances > 0 else 0
+    formatted_accuracies.update({"small_qt_accracy(vqa-wo-unans)":small_qt_accracy})
+    ###########################################################
     
     overall_correct_predictions = ((result_data['answer_type'] == result_data['answer_type_prediction'])).sum()
+    total_instances = len(result_data)
+    small_qt_accracy = overall_correct_predictions / total_instances if total_instances > 0 else 0
+    formatted_accuracies.update({"large_qt_accracy(vqa-wo-unans, originn)":small_qt_accracy})
+
+    overall_correct_predictions = ((result_data['processed_answer_type'] == result_data['processed_answer_type_prediction'])).sum()
     total_instances = len(result_data)
     small_qt_accracy = overall_correct_predictions / total_instances if total_instances > 0 else 0
     formatted_accuracies.update({"large_qt_accracy(vqa-wo-unans)":small_qt_accracy})
