@@ -25,9 +25,9 @@ def trainer(model, data_loader, optimizer, loss_function, epoch, device, schedul
         
         optimizer.zero_grad()
         # total_loss.backward()
-        qt_loss.backward()
+        qt_loss.backward(retain_graph=True)
         for vqa_loss_i in vqa_losses.values():
-            vqa_loss_i.backward()
+            vqa_loss_i.backward(retain_graph=True)
         optimizer.step()
         scheduler.step()
         if args.wandb:
