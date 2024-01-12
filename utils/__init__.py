@@ -416,8 +416,8 @@ def initialize_wandb(args):
             pat = file.read().strip()
         branch = f"{args.model}/{args.task}/{args.version}/{args.dataset}"
         message = args.note
-        os.system(f'git config --global user.email "dunghuynh110496@gmail.com"')
-        os.system(f'git config --global user.name "parkerhuynh"')
+        # os.system(f'git config --global user.email "dunghuynh110496@gmail.com"')
+        # os.system(f'git config --global user.name "parkerhuynh"')
         os.system(f"git remote set-url origin https://parkerhuynh:{pat}@github.com/parkerhuynh/HieVQA.git")
         os.system(f"git fetch --all")
         
