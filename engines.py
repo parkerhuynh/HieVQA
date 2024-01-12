@@ -67,7 +67,7 @@ def validator(model, data_loader, device, loss_function, args, epoch):
         with torch.no_grad():
             images, questions, answers, answer_type, question_ids = images.to(device), questions.to(device), answers.to(device), answer_type.to(device), question_ids.to(device)
             qt_output, vqa_outputs = model(images, questions)
-            qt_loss, vqa_loss, total_loss = loss_function(qt_output, answer_type, vqa_outputs, answers)
+            qt_loss, vqa_loss, total_loss, vqa_losses = loss_function(qt_output, answer_type, vqa_outputs, answers)
             metric_logger.update(vqa_loss=vqa_loss.item())
             metric_logger.update(qt_loss=qt_loss)
             metric_logger.update(total_loss=total_loss)
