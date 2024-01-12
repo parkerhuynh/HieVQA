@@ -19,6 +19,7 @@ class VQA_Trainer:
 
         self.best_qt_loss = float('inf')
         self.stop_early_epoch = 0
+        self.stop_active = False
         
     def trainer(self, data_loader, epoch):
         self.model.train()
@@ -38,7 +39,8 @@ class VQA_Trainer:
             
             self.optimizer.zero_grad()
             # total_loss.backward()
-            qt_loss.backward(retain_graph=True)
+            if not self.stop_active:
+                qt_loss.backward(retain_graph=True)
             for vqa_loss_i in vqa_losses.values():
                 vqa_loss_i.backward(retain_graph=True)
             self.optimizer.step()
@@ -78,8 +80,14 @@ class VQA_Trainer:
                 metric_logger.update(vqa_loss=vqa_loss.item())
                 metric_logger.update(qt_loss=qt_loss)
                 metric_logger.update(total_loss=total_loss)
-                
-                
+                if qt_loss < self.best_qt_loss:
+                    if not self.stop_active:
+                        self.best_qt_loss = qt_loss
+                        self.stop_early_epoch = 0
+                else:
+                    self.stop_early_epoch += 1
+                    if self.stop_early_epoch == 5:
+                        self.stop_active = True
                 total_question_ids.append(question_ids)
                 total_qt_targets.append(answer_type)
                 total_vqa_targets.append(answers)
