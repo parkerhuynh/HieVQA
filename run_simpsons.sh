@@ -8,7 +8,7 @@ NPROC_PER_NODE=4 # Number of processes per node
 # Variables for the command
 data_path="/home/reda/scratch/ngoc/data/simpsonsvqa"
 dataset="simpsonsvqa"
-model="VQA"
+model="SAN"
 output_dir="/home/reda/scratch/ngoc/code/HieVQA/results"
 task=hie-vqa-wo-unans-3types # vqa-w-ans & vqa-hie
 note="Hie-VQA-WO-Unans-3types"
