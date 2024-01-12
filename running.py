@@ -362,9 +362,6 @@ def main(args):
             ######################################################################
             y_true = val_prediction_csv['answer_type']
             y_pred = val_prediction_csv['answer_type_prediction']
-            # new_item = pd.Series(["unanswerable"])
-            # y_true = pd.concat([y_true, new_item], ignore_index=True)
-            # y_pred = pd.concat([y_pred, new_item], ignore_index=True)
             conf_matrix = confusion_matrix(y_true, y_pred, labels=y_true.unique())
             
             # Normalize the confusion matrix
