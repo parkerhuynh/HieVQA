@@ -12,7 +12,7 @@ model="VQA"
 output_dir="/home/reda/scratch/ngoc/code/HieVQA/results"
 task=hie-vqa-wo-unans # vqa-w-ans & vqa-hie
 note="Hie-VQA-WO-Unans"
-version="v1"
+version="v2"
 bs=256
 bs_test=256
 

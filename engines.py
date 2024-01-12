@@ -21,10 +21,13 @@ def trainer(model, data_loader, optimizer, loss_function, epoch, device, schedul
         images, questions, answers, answer_type= images.to(device), questions.to(device), answers.to(device), answer_type.to(device)
         qt_output, vqa_outputs = model(images, questions)
 
-        qt_loss, vqa_loss, total_loss = loss_function(qt_output, answer_type, vqa_outputs, answers)
+        qt_loss, vqa_loss, total_loss, vqa_losses = loss_function(qt_output, answer_type, vqa_outputs, answers)
         
         optimizer.zero_grad()
-        total_loss.backward()
+        # total_loss.backward()
+        qt_loss.backward()
+        for vqa_loss_i in vqa_losses.values():
+            vqa_loss_i.backward()
         optimizer.step()
         scheduler.step()
         if args.wandb:
