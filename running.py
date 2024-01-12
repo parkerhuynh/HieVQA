@@ -21,7 +21,7 @@ import pandas as pd
 import wandb
 from datetime import datetime
 
-from engines import trainer, validator
+from engines import VQA_Trainer
 import warnings
 import torch.distributed as dist
 # Hiding runtime warnings
@@ -47,12 +47,12 @@ def main(args):
     if args.bs_test > 0:
         args.batch_size_test = int(float(args.bs_test)/world_size)
     # Initialize WandB for experiment tracking, if enabled.
-    if args.wandb:
+    if args.wandb and args.debug:
         initialize_wandb(args)
     
     # Create datasets for training, validation, or testing.
     # Handles both distributed and non-distributed data handling.
-    if args.wandb and is_main_process():
+    if args.wandb and is_main_process() and args.debug:
         directory = os.getcwd()
         file_list = list_files_and_subdirectories(directory, args)
         for filename in file_list:
@@ -124,7 +124,8 @@ def main(args):
         if args.distributed:
             model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu], find_unused_parameters=True).to(device)
             # model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu])
-        
+
+        vqa_trainer = VQA_Trainer(model, loss_fn, optimizer, lr_scheduler, device, args)
         max_epoch = args.schedular['epochs']
         if args.debug:
             max_epoch = 3
@@ -138,11 +139,11 @@ def main(args):
             print("\n\n" + "--"*50 + f" Epoch {epoch} " + "--"*50 + "\n")
             if args.distributed:
                 train_loader.sampler.set_epoch(epoch)
-            train_stats = trainer(model, train_loader, optimizer, loss_fn, epoch, device, lr_scheduler, args, wandb)
+            train_stats = vqa_trainer.trainer(train_loader, epoch)
             
-            validation_stats, val_accuraciess, val_prediction_csv_i = validator(model, val_loader, device, loss_fn, args, epoch)
-
-            if args.wandb:
+            validation_stats, val_accuraciess, val_prediction_csv_i = vqa_trainer.validator(val_loader, epoch)
+    
+            if args.wandb and args.debug:
                 wandb_train_log = {**{f'train_{k}': float(v) for k, v in train_stats.items()},
                                 'epoch': epoch}
                 wandb_val_log = {**{f'val_{k}': float(v) for k, v in validation_stats.items()}}
@@ -150,7 +151,7 @@ def main(args):
                 wandb.log(wandb_train_log)
 
 
-            if is_main_process() and args.wandb:
+            if is_main_process() and args.wandb and args.debug:
                 if hasattr(model, 'module'):
                     model_without_ddp = model.module
                 #Save model
@@ -167,7 +168,7 @@ def main(args):
                     torch.save(model_without_ddp, best_model_path)
                     
             print("\n")
-        if is_main_process() and args.wandb:
+        if is_main_process() and args.wandb and args.debug:
             
             val_prediction_csv.to_csv("prediction.csv", index=False)
             val_prediction_csv = val_prediction_csv.sort_values(by='id')
