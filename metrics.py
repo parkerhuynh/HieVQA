@@ -44,6 +44,22 @@ def calculate_vqa_accuracy(result_data):
     }
     formatted_accuracies.update(unanswerable_resuslt)
     ###########################################################
+
+    overall_correct_predictions = ((result_data['small_answer_type_target'] == result_data['small_answer_type_prediction'])).sum()
+    total_instances = len(result_data)
+    small_qt_accracy = overall_correct_predictions / total_instances if total_instances > 0 else 0
+    formatted_accuracies.update({"small_qt_accracy(vqa-w-unans)":small_qt_accracy})
+    ###########################################################
+    
+    overall_correct_predictions = ((result_data['answer_type'] == result_data['answer_type_prediction'])).sum()
+    total_instances = len(result_data)
+    small_qt_accracy = overall_correct_predictions / total_instances if total_instances > 0 else 0
+    formatted_accuracies.update({"large_qt_accracy(vqa-w-unans, originn)":small_qt_accracy})
+
+    overall_correct_predictions = ((result_data['processed_answer_type'] == result_data['processed_answer_type_prediction'])).sum()
+    total_instances = len(result_data)
+    small_qt_accracy = overall_correct_predictions / total_instances if total_instances > 0 else 0
+    formatted_accuracies.update({"large_qt_accracy(vqa-w-unans)":small_qt_accracy})
     
     result_data = result_data[result_data["processed_answer_type"] !="unanswerable"]
     accuracies = {}
@@ -64,6 +80,28 @@ def calculate_vqa_accuracy(result_data):
     vqa_accuracy = overall_correct_predictions / total_instances if total_instances > 0 else 0
     formatted_accuracies.update({"val_accuracy_vqa(vqa-wo-unans)":vqa_accuracy})
 
+    overall_correct_predictions = ((result_data['small_answer_type_target'] == result_data['small_answer_type_prediction'])).sum()
+    total_instances = len(result_data)
+    small_qt_accracy = overall_correct_predictions / total_instances if total_instances > 0 else 0
+    formatted_accuracies.update({"small_qt_accracy(vqa-wo-unans)":small_qt_accracy})
+    ###########################################################
+
+    overall_correct_predictions = ((result_data['small_answer_type_target'] == result_data['small_answer_type_prediction'])).sum()
+    total_instances = len(result_data)
+    small_qt_accracy = overall_correct_predictions / total_instances if total_instances > 0 else 0
+    formatted_accuracies.update({"small_qt_accracy(vqa-wo-unans)":small_qt_accracy})
+    ###########################################################
+    
+    overall_correct_predictions = ((result_data['answer_type'] == result_data['answer_type_prediction'])).sum()
+    total_instances = len(result_data)
+    small_qt_accracy = overall_correct_predictions / total_instances if total_instances > 0 else 0
+    formatted_accuracies.update({"large_qt_accracy(vqa-wo-unans, originn)":small_qt_accracy})
+
+    overall_correct_predictions = ((result_data['processed_answer_type'] == result_data['processed_answer_type_prediction'])).sum()
+    total_instances = len(result_data)
+    small_qt_accracy = overall_correct_predictions / total_instances if total_instances > 0 else 0
+    formatted_accuracies.update({"large_qt_accracy(vqa-wo-unans)":small_qt_accracy})
+
         
     return formatted_accuracies
 
@@ -80,6 +118,12 @@ def calculate_accuracies(df, dataset):
     
     df["birary answerable prediction"] = df["prediction class"].apply(lambda x: "unanswerable" if x == "unanswerable" else "answerable")
     df["birary answerable tartget"] = df["target class"].apply(lambda x: "unanswerable" if x == "unanswerable" else "answerable")
+
+    df["answer_type"] =  df["small_answer_type_target"].apply(lambda x: x if x in ["yes/no", "number"] else "other")
+    df["answer_type_prediction"] =  df["small_answer_type_prediction"].apply(lambda x: x if x in ["yes/no", "number"] else "other")
+
+    df["processed_answer_type"] =  df["small_answer_type_target"].apply(lambda x: x if x in ["yes/no", "number", "unanswerable"] else "other")
+    df["processed_answer_type_prediction"] =  df["small_answer_type_prediction"].apply(lambda x: x if x in ["yes/no", "number", "unanswerable"] else "other")
 
     accuracy_vqa = calculate_vqa_accuracy(df)
     return accuracy_vqa, df
