@@ -139,7 +139,7 @@ class VQA_Trainer:
             
             val_accuracies, val_prediction_csv = calculate_accuracies(val_prediction_csv, data_loader.dataset)
             val_accuracies["epoch"] = epoch
-            if args.wandb:
+            if self.args.wandb:
                 wandb.log(val_accuracies)
         metric_logger.synchronize_between_processes()
         print(f"Averaged stats: {metric_logger.global_avg()}")
