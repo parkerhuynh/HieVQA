@@ -268,9 +268,6 @@ def main(args):
             directory = os.getcwd()
             file_path = os.path.join(directory, f"model_{args.code_version}.onnx")
             wandb.save(file_path, directory)
-            directory = os.getcwd()
-            file_path = os.path.join(directory, f"model_{args.code_version}.onnx")
-            wandb.save(file_path, directory)
             
             
 
@@ -289,7 +286,7 @@ if __name__ == '__main__':
     parser.add_argument('--dataset', type=str)
     parser.add_argument('--note', type=str)
     parser.add_argument('--version', type=str)
-    parser.add_argument('--task', type=str, required=True, choices=['vqa-wo-unans', 'vqa-w-unans', 'hie-vqa-wo-unans'])
+    parser.add_argument('--task', type=str, required=True, choices=['vqa-wo-unans', 'vqa-w-unans', 'hie-vqa-wo-unans-3types'])
     parser.add_argument('--debug', action='store_true')
     parser.add_argument('--wandb', action='store_true')
     parser.add_argument('--wandb_dir', type=str, help="for fine-tuning")
