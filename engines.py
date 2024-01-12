@@ -45,7 +45,7 @@ class VQA_Trainer:
                 vqa_loss_i.backward(retain_graph=True)
             self.optimizer.step()
             self.scheduler.step()
-            if self.args.wandb:
+            if self.args.wandb and not args.debug:
                 wandb.log({"train_vqa_loss_iter": vqa_loss.item()})
             metric_logger.update(vqa_loss=vqa_loss)
             metric_logger.update(qt_loss=qt_loss)
@@ -147,7 +147,7 @@ class VQA_Trainer:
             
             val_accuracies, val_prediction_csv = calculate_accuracies(val_prediction_csv, data_loader.dataset)
             val_accuracies["epoch"] = epoch
-            if self.args.wandb:
+            if self.args.wandb and  not args.debug:
                 wandb.log(val_accuracies)
         metric_logger.synchronize_between_processes()
         print(f"Averaged stats: {metric_logger.global_avg()}")
