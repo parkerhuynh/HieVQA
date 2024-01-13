@@ -77,7 +77,7 @@ class VQA_header(nn.Module):
     A Visual Question Answering (VQA) header module.
     """
 
-    def __init__(self,args, ans_vocab_type_dict, idx_to_answer_type):
+    def __init__(self, ans_vocab_type_dict):
         super().__init__()
 
         # ModuleDict for VQA headers
@@ -87,28 +87,14 @@ class VQA_header(nn.Module):
                 nn.Dropout(p=0.5),
                 nn.Tanh(),
                 nn.Linear(1000, len(ans_vocab_type_dict[answer_type]))
-            ).cuda() for answer_type in ans_vocab_type_dict.keys()
+            ) for answer_type in ans_vocab_type_dict.keys()
         })
-        number_classes = []
-        for answer_type in ans_vocab_type_dict.keys():
-            number_classes.append(len(ans_vocab_type_dict[answer_type]))
-        self.max_number_answer = max(number_classes)
-
-
-        # Mapping from question type index to string key
-        self.question_type_dict = idx_to_answer_type
-
-    def forward(self, hidden_states, question_type_output):
-        max_values, predicted_classes  = torch.max(question_type_output, 1)
-        predicted_classes = predicted_classes.cpu().tolist()
-        predicted_classes = [self.question_type_dict[predicted_class] for predicted_class in predicted_classes]
-
-        holder_answers = torch.zeros(hidden_states.shape[0], self.max_number_answer).cuda()
-        for i, q_type in enumerate(predicted_classes):
-            outputs = self.vqa_headers[q_type](hidden_states[i])
-            output_size = outputs.size()[0]
-            holder_answers[i, :output_size] = outputs
-        return holder_answers
+    def forward(self, hidden_states):
+        results = {}
+        for question_category in self.vqa_headers.keys():
+            outputs = self.vqa_headers[question_category](hidden_states)
+            results[question_category] = outputs
+        return results
     
 class Ques_Ans_Attention(nn.Module):
     def __init__(self, args, d=1024, k=512, dropout=True):
@@ -124,32 +110,16 @@ class Ques_Ans_Attention(nn.Module):
         if self.dropout:
             self.dropout_ = nn.Dropout(p=0.5)
 
-    def debug_print(self, message, tensor):
-        if self.args.debug_print:
-            print(f"{message}: {tensor.size()}")
-
     def forward(self, vi, vq, train=True):
         hi = self.ff_image(vi)
-        self.debug_print("image transformed feature size", hi)
-
         hq = self.ff_ques(vq).unsqueeze(dim=1)
-        self.debug_print("unsqueeze Question transformed feature size", hq)
-
         ha = torch.tanh(hi + hq)
-        self.debug_print("Element-wise sum size", ha)
-
         if self.dropout and train:
             ha = self.dropout_(ha)
-
         ha = self.ff_attention(ha).squeeze(dim=2)
-        self.debug_print("Reduced Attention weights size", ha)
 
         pi = torch.softmax(ha, dim=1)
-        self.debug_print("Attention distribution size", pi)
-
         vi_attended = (pi.unsqueeze(dim=2) * vi).sum(dim=1)
-        self.debug_print("Attended Visual Features", vi_attended)
-
         u = vi_attended + vq
         return u
 
@@ -167,47 +137,20 @@ class SANHieVQA(nn.Module):
             word_embedding_size=args.model_config["word_embedding"],
             hidden_size=args.model_config["rnn_hidden_size"])
         
-        self.vqa_mlp = VQA_header(args, ans_vocab_type_dict, idx_to_answer_type)
+        self.vqa_mlp = VQA_header(ans_vocab_type_dict)
     
-        self.questiont_type_mlp = QuestionType(args, idx_to_answer_type)
+        self.question_type_mlp = QuestionType(args, idx_to_answer_type)
         self.san = nn.ModuleList([Ques_Ans_Attention(self.args, args.model_config["image_feature_output"], 512)] * args.model_config["num_att_layers"])
         
-
-    def debug_print(self, message):
-        """
-        Prints debug information if debug mode is enabled.
-        """
-        if self.args.debug_print:
-            print(message)
-
-    def forward(self, image, question, train=True):
-        # Extract Image Features
-        self.debug_print("Extract Question and Image Features")
+    def forward(self, image, question):
         image = self.image_encoder(image)
-
-        # Extract Question Features
-        self.debug_print(f"image feature: {image.size()}")
         question = self.word_embeddings(question)
-        self.debug_print(f"question Word Embedding: {question.size()}")
         question = self.question_encoder(question)
-        self.debug_print(f"question feature: {question.size()}")
-
-        # Question Guided Attention
-        self.debug_print("\nQuestion-guided Attention")
-
         vi = image
         u = question
         for attn_layer in self.san:
             u = attn_layer(vi, u)
         attended_features = u
-
-
-        self.debug_print(f"Fusion feature: {attended_features.size()}")
-
-        # Calculate losses if in training mode
-        self.debug_print("\nQuestion Type Problem")
-        question_type_output = self.questiont_type_mlp(attended_features)
-        self.debug_print(f"question_type_output size: {question_type_output.size()}")
-
-        vqa_output =  self.vqa_mlp(attended_features, question_type_output)
-        return question_type_output, vqa_output
+        question_type_output = self.question_type_mlp(attended_features)
+        vqa_outputs =  self.vqa_mlp(attended_features)
+        return question_type_output, vqa_outputs
