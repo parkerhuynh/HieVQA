@@ -86,6 +86,7 @@ class VQADataset(Dataset):
         idx_to_ann = {}
         processed_ann = []
         for ann in annotations:
+            print(ann)
             idx_to_ann[ann["id"]] = ann
             
             origine_ans_str = ann["original_answer"]
