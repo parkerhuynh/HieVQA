@@ -152,13 +152,13 @@ def prep_ans(answer):
     return answer
 
 
-def create_ann_vocal(examples, args):
+def create_ann_vocal(examples, args, super_types):
     ans2tok, tok2ans = {}, {}
     id = {}
     
     for ex in examples:
         ans_str = ex["answer"]
-        ans_type = ex["answer_type"]
+        ans_type = super_types[ans_str]
         if ans_str != "unanswerable":
             if ans_type not in ans2tok:
                 ans2tok[ans_type] = {"unanswerable": 0}

@@ -25,6 +25,7 @@ class VQADataset(Dataset):
         self.split = split
         self.args = args
         self.token_to_ix, self.pretrained_emb, self.token_size = self.prepare_question_vocab()
+        self.super_types = self.load_json_file('/home/reda/scratch/ngoc/code/HieVQA/dataset/super_answer_type_simpsons.json')
         self.ans_to_ix, self.ix_to_ans = self.prepare_answer_vocab()
         self.ans_size = len(self.ans_to_ix)
         self.ans_type_to_idx = {}
@@ -122,7 +123,7 @@ class VQADataset(Dataset):
             stat_ans_list += self.load_json_file(ans_path)['annotations']
         stat_ans_list = annotation_preprocessing(stat_ans_list)
         
-        ans_to_ix, ix_to_ans = annotation_vocal(stat_ans_list, self.args)
+        ans_to_ix, ix_to_ans = annotation_vocal(stat_ans_list, self.args, self.super_types)
         return ans_to_ix, ix_to_ans
         
     
@@ -131,7 +132,7 @@ class VQADataset(Dataset):
         #     return self.args.batch_size_train*4
         # if self.split == "train":
         #     return self.args.batch_size_train*4
-        return len(self.annotations)
+        return self.args.batch_size_train*4 #len(self.annotations)
     
     
     def example_processing(self, image, ques, ann):
