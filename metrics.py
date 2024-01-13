@@ -107,18 +107,14 @@ def calculate_vqa_accuracy(result_data):
 
 
 def calculate_accuracies(df, dataset):
-    with open("./dataset/super_answer_type_simpsons.json", 'r') as file:
-        super_type = json.load(file)
-        
-        
-    df["answer_type"] = df["answer_type"].map(dataset.idx_to_ans_type)
-    df["answer_type_prediction"] = df["answer_type_prediction"].map(dataset.idx_to_ans_type)
+    
+    df["small_answer_type_target"] = df["answer_type"].map(dataset.idx_to_ans_type)
+    df["small_answer_type_prediction"] = df["answer_type_prediction"].map(dataset.idx_to_ans_type)
+    #########################################################################
     
     df["target class"] = df[["answer_type", "target"]].apply(lambda x: convert_process(x["answer_type"], x["target"], dataset), axis =1)
     df["prediction class"] = df[["answer_type_prediction", "prediction"]].apply(lambda x: convert_process(x["answer_type_prediction"], x["prediction"], dataset),  axis =1)
     
-    df["small_answer_type_target"] = df["target class"].apply(lambda x: super_type[x])
-    df["small_answer_type_prediction"] = df["prediction class"].apply(lambda x: super_type[x])
     
     df["binary answerable prediction"] = df["prediction class"].apply(lambda x: "unanswerable" if x == "unanswerable" else "answerable")
     df["binary answerable target"] = df["target class"].apply(lambda x: "unanswerable" if x == "unanswerable" else "answerable")
