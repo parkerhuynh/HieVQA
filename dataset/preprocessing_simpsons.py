@@ -153,21 +153,22 @@ def prep_ans(answer):
 
 
 def create_ann_vocal(examples, args):
-    ans2tok, tok2ans = {}, {}
+    ans2tok, tok2ans = {"unanswerable": 0}, {0: "unanswerable"}
     id = {}
     
     for ex in examples:
         ans_str = ex["answer"]
         ans_type = ex["answer_type"]
-        if ans_type not in ans2tok:
-            ans2tok[ans_type] = {}
-            tok2ans[ans_type] = {}
-            id[ans_type] = 0
-        if ans_str not in ans2tok[ans_type]:
-            id_i = id[ans_type]
-            ans2tok[ans_type][ans_str] = id_i
-            tok2ans[ans_type][id_i] = ans_str
-            id[ans_type] += 1
+        if ans_str != "unanswerable":
+            if ans_type not in ans2tok:
+                ans2tok[ans_type] = {}
+                tok2ans[ans_type] = {}
+                id[ans_type] = 0
+            if ans_str not in ans2tok[ans_type]:
+                id_i = id[ans_type]
+                ans2tok[ans_type][ans_str] = id_i
+                tok2ans[ans_type][id_i] = ans_str
+                id[ans_type] += 1
     return ans2tok, tok2ans 
 
 
