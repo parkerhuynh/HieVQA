@@ -89,7 +89,7 @@ class VQADataset(Dataset):
             idx_to_ann[ann["id"]] = ann
             
             origine_ans_str = ann["original_answer"]
-            ans_str = ann["original_answer"]
+            ans_str = ann["answer"]
             at_str = self.super_types[origine_ans_str]
             
             ans_to_idx_dict = self.ans_to_ix[at_str]
