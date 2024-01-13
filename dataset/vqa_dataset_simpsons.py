@@ -88,8 +88,9 @@ class VQADataset(Dataset):
         for ann in annotations:
             idx_to_ann[ann["id"]] = ann
             
-            ans_str = ann["answer"]
-            at_str = self.super_types[ans_str]
+            origine_ans_str = ann["original_answer"]
+            ans_str = ann["original_answer"]
+            at_str = self.super_types[origine_ans_str]
             
             ans_to_idx_dict = self.ans_to_ix[at_str]
             
@@ -171,10 +172,12 @@ def annotation_preprocessing( anns):
                 ans_count += 1
         if ans_count >= 2:
             ann["answer"] = prep_ans(ann["answer"])
+            ann["original_answer"] = ann["answer"]
             ann["processed_answer_type"] = ann["answer_type"]
             proccesed_anns.append(ann)
         elif ann["overall_scores"]["question"] < 0.5:
             ann["answer"] = "unanswerable"
+            ann["original_answer"] = ann["answer"]
             ann["processed_answer_type"] = "unanswerable"
             proccesed_anns.append(ann)
     return proccesed_anns
