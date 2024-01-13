@@ -34,6 +34,7 @@ from io import BytesIO
 from PIL import Image
 import numpy as np
 import torch.onnx
+from loss import HierarchicalLoss
 
 
 def main(args):
@@ -102,9 +103,10 @@ def main(args):
         args.schedular['lr'] = float(args.schedular['lr'])
         model = get_model(args, train_dataset)
         if is_main_process() and args.wandb:
+            model = model.to(device)
             batch_example = next(iter(train_loader))
-            example_image = batch_example[0]
-            example_question = batch_example[1]
+            example_image = batch_example[0].to(device)
+            example_question = batch_example[1].to(device)
             torch.onnx.export(model, (example_image, example_question), f"model_{args.code_version}.onnx")
         model = model.to(device)
         
@@ -114,7 +116,7 @@ def main(args):
         arg_sche = AttrDict(args.schedular)
         arg_sche['step_per_epoch'] = math.ceil(train_dataset_size / (args.batch_size_train * world_size))
         lr_scheduler = create_scheduler(arg_sche, optimizer)
-        loss_fn =  torch.nn.CrossEntropyLoss()
+        loss_fn =  HierarchicalLoss(args, train_dataset)
 
         # lr_scheduler = None
         # optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
@@ -126,7 +128,7 @@ def main(args):
         max_epoch = args.schedular['epochs']
         if args.debug:
             max_epoch = 3
-            val_loader = train_loader
+            # val_loader = train_loader
         start_epoch = 0
         best_acc = 0
         val_prediction_csv = None
@@ -156,8 +158,8 @@ def main(args):
                 last_model_path = os.path.join(args.output_dir, "model_latest_epoch.pt")
                 torch.save(model_without_ddp, last_model_path)
                 
-                if val_accuraciess['val_accuracy_vqa(vqa-w-unans)'] > best_acc:
-                    best_acc = val_accuraciess['val_accuracy_vqa(vqa-w-unans)']
+                if val_accuraciess['val_accuracy_vqa(vqa-wo-unans)'] > best_acc:
+                    best_acc = val_accuraciess['val_accuracy_vqa(vqa-wo-unans)']
                     wandb_log_val_accuracy_best = {**{f'best_{k}': v for k, v in val_accuraciess.items()}}
                     wandb.log(wandb_log_val_accuracy_best)
                     
