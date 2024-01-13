@@ -172,7 +172,7 @@ def create_ann_vocal(examples, args, super_types):
     return ans2tok, tok2ans 
 
 
-def annotation_vocal(anns, args):
+def annotation_vocal(anns, args, super_types):
     annotation_path = f"./dataset/ann_vocal_{args.task}_{args.dataset}.json"
     
     if os.path.exists(annotation_path):
@@ -181,7 +181,7 @@ def annotation_vocal(anns, args):
         ans_to_ix, ix_to_ans = json.load(open(annotation_path, 'r'))
     else:
         print(f'> Create and save {args.dataset} annotation dictionary'.upper())
-        ans_to_ix, ix_to_ans = create_ann_vocal(anns,args)
+        ans_to_ix, ix_to_ans = create_ann_vocal(anns,args, super_types)
         json.dump([ans_to_ix, ix_to_ans], open(annotation_path, 'w'))
     return ans_to_ix, ix_to_ans
 
