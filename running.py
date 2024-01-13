@@ -122,8 +122,8 @@ def main(args):
         # optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
         #SET UP
         if args.distributed:
-            model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu], find_unused_parameters=True).to(device)
-            # model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu])
+            # model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu], find_unused_parameters=True).to(device)
+            model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu])
         
         max_epoch = args.schedular['epochs']
         if args.debug:
