@@ -295,7 +295,7 @@ def main(args):
             plt.close()
             
             ######################################################################
-            y_true = val_prediction_csv['binary answerable tartget']
+            y_true = val_prediction_csv['binary answerable target']
             y_pred = val_prediction_csv['binary answerable prediction']
             conf_matrix = confusion_matrix(y_true, y_pred, labels=y_true.unique())
             conf_matrix_normalized = conf_matrix.astype('float') / conf_matrix.sum(axis=1)[:, np.newaxis]

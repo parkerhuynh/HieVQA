@@ -8,7 +8,7 @@ def calculate_vqa_accuracy(result_data):
     accuracies = {}
     for lqt in result_data['processed_answer_type'].unique():
         df_lqt = result_data[result_data['processed_answer_type'] == lqt]
-        correct_predictions = ((df_lqt['prediction'] == df_lqt['target'])).sum()
+        correct_predictions = ((df_lqt['prediction class'] == df_lqt['target class'])).sum()
         total_instances = len(df_lqt)
         accuracies[lqt] = correct_predictions / total_instances if total_instances > 0 else 0
     
@@ -20,7 +20,7 @@ def calculate_vqa_accuracy(result_data):
     accuracies = {}
     for lqt in result_data['answer_type'].unique():
         df_lqt = result_data[result_data['answer_type'] == lqt]
-        correct_predictions = ((df_lqt['prediction'] == df_lqt['target'])).sum()
+        correct_predictions = ((df_lqt['prediction class'] == df_lqt['target class'])).sum()
         total_instances = len(df_lqt)
         accuracies[lqt] = correct_predictions / total_instances if total_instances > 0 else 0
     formatted_accuracies_1 = {
@@ -29,7 +29,7 @@ def calculate_vqa_accuracy(result_data):
     formatted_accuracies.update(formatted_accuracies_1)
     ###########################################################
     
-    overall_correct_predictions = ((result_data['prediction'] == result_data['target'])).sum()
+    overall_correct_predictions = ((result_data['prediction class'] == result_data['target class'])).sum()
     total_instances = len(result_data)
     vqa_accuracy = overall_correct_predictions / total_instances if total_instances > 0 else 0
     formatted_accuracies.update({"val_accuracy_vqa(vqa-w-unans)":vqa_accuracy})
@@ -65,7 +65,7 @@ def calculate_vqa_accuracy(result_data):
     accuracies = {}
     for lqt in result_data['answer_type'].unique():
         df_lqt = result_data[result_data['answer_type'] == lqt]
-        correct_predictions = ((df_lqt['prediction'] == df_lqt['target'])).sum()
+        correct_predictions = ((df_lqt['prediction class'] == df_lqt['target class'])).sum()
         total_instances = len(df_lqt)
         accuracies[lqt] = correct_predictions / total_instances if total_instances > 0 else 0
     
@@ -75,7 +75,7 @@ def calculate_vqa_accuracy(result_data):
     formatted_accuracies.update(formatted_accuracies_2)
     ###########################################################
     
-    overall_correct_predictions = ((result_data['prediction'] == result_data['target'])).sum()
+    overall_correct_predictions = ((result_data['prediction class'] == result_data['target class'])).sum()
     total_instances = len(result_data)
     vqa_accuracy = overall_correct_predictions / total_instances if total_instances > 0 else 0
     formatted_accuracies.update({"val_accuracy_vqa(vqa-wo-unans)":vqa_accuracy})
@@ -104,30 +104,6 @@ def calculate_vqa_accuracy(result_data):
 
         
     return formatted_accuracies
-
-def calculate_accuracies(df, dataset):
-    with open("./dataset/super_answer_type_simpsons.json", 'r') as file:
-        super_type = json.load(file)
-    df["prediction class"] = df["prediction"].apply(lambda x: dataset.ix_to_ans[str(x)])
-    df["target class"] = df["target"].apply(lambda x: dataset.ix_to_ans[str(x)])
-    df["answer_type"] = df["id"].apply(lambda x: dataset.idx_to_ann[x]["answer_type"])
-    df["processed_answer_type"] = df["id"].apply(lambda x: dataset.idx_to_ann[x]["processed_answer_type"])
-    
-    df["small_answer_type_target"] = df["target class"].apply(lambda x: super_type[x])
-    df["small_answer_type_prediction"] = df["prediction class"].apply(lambda x: super_type[x])
-    
-    df["binary answerable prediction"] = df["prediction class"].apply(lambda x: "unanswerable" if x == "unanswerable" else "answerable")
-    df["binary answerable target"] = df["target class"].apply(lambda x: "unanswerable" if x == "unanswerable" else "answerable")
-
-    df["answer_type"] =  df["small_answer_type_target"].apply(lambda x: x if x in ["yes/no", "number"] else "other")
-    df["answer_type_prediction"] =  df["small_answer_type_prediction"].apply(lambda x: x if x in ["yes/no", "number"] else "other")
-
-    df["processed_answer_type"] =  df["small_answer_type_target"].apply(lambda x: x if x in ["yes/no", "number", "unanswerable"] else "other")
-    df["processed_answer_type_prediction"] =  df["small_answer_type_prediction"].apply(lambda x: x if x in ["yes/no", "number", "unanswerable"] else "other")
-
-    accuracy_vqa = calculate_vqa_accuracy(df)
-    return accuracy_vqa, df
-
 
 
 def calculate_accuracies(df, dataset):
