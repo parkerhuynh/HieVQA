@@ -88,8 +88,9 @@ class VQADataset(Dataset):
         for ann in annotations:
             idx_to_ann[ann["id"]] = ann
             
-            at_str = ann["answer_type"]
             ans_str = ann["answer"]
+            at_str = self.super_types[ans_str]
+            
             ans_to_idx_dict = self.ans_to_ix[at_str]
             
             at_idx = self.ans_type_to_idx[at_str]
