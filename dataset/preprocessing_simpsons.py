@@ -158,7 +158,7 @@ def create_ann_vocal(examples, args):
     
     for ex in examples:
         ans_str = ex["answer"]
-        ans_type = ex[" "]
+        ans_type = ex["answer_type"]
         if ans_str != "unanswerable":
             if ans_type not in ans2tok:
                 ans2tok[ans_type] = {"unanswerable": 0}
