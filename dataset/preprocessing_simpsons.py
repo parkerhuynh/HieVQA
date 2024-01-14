@@ -161,8 +161,8 @@ def create_ann_vocal(examples, args, super_types):
         ans_type = super_types[ans_str]
         if ans_str != "unanswerable":
             if ans_type not in ans2tok:
-                ans2tok[ans_type] = {"unanswerable": 0}
-                tok2ans[ans_type] = {0: "unanswerable"}
+                ans2tok[ans_type] = {}
+                tok2ans[ans_type] = {}
                 id[ans_type] = 1
             if ans_str not in ans2tok[ans_type]:
                 id_i = id[ans_type]

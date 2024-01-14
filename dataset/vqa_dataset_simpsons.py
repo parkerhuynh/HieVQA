@@ -135,7 +135,7 @@ class VQADataset(Dataset):
         #     return self.args.batch_size_train*4
         # if self.split == "train":
         #     return self.args.batch_size_train*4
-        return len(self.annotations)
+        return self.args.batch_size_train*4 #len(self.annotations)
     
     
     def example_processing(self, image, ques, ann):
@@ -175,10 +175,5 @@ def annotation_preprocessing( anns):
             ann["answer"] = prep_ans(ann["answer"])
             ann["original_answer"] = ann["answer"]
             ann["processed_answer_type"] = ann["answer_type"]
-            proccesed_anns.append(ann)
-        elif ann["overall_scores"]["question"] < 0.5:
-            ann["original_answer"] = ann["answer"]
-            ann["answer"] = "unanswerable"
-            ann["processed_answer_type"] = "unanswerable"
             proccesed_anns.append(ann)
     return proccesed_anns
