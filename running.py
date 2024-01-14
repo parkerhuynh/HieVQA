@@ -205,49 +205,49 @@ def main(args):
 
             ######################################################################
 
-            # y_true = val_prediction_csv['answer_type']
-            # y_pred = val_prediction_csv['answer_type_prediction']
-            # conf_matrix = confusion_matrix(y_true, y_pred, labels=y_true.unique())
+            y_true = val_prediction_csv['answer_type']
+            y_pred = val_prediction_csv['answer_type_prediction']
+            conf_matrix = confusion_matrix(y_true, y_pred, labels=y_true.unique())
             
-            # # Normalize the confusion matrix
-            # conf_matrix_normalized = conf_matrix.astype('float') / conf_matrix.sum(axis=1)[:, np.newaxis]
+            # Normalize the confusion matrix
+            conf_matrix_normalized = conf_matrix.astype('float') / conf_matrix.sum(axis=1)[:, np.newaxis]
             
-            # # Set up the matplotlib figure for side-by-side plots
-            # plt.figure(figsize=(30, 12))
+            # Set up the matplotlib figure for side-by-side plots
+            plt.figure(figsize=(30, 12))
             
-            # # Regular confusion matrix
-            # plt.subplot(1, 2, 1)
-            # sns.heatmap(conf_matrix, annot=True, fmt='d', 
-            #             xticklabels=y_true.unique(), yticklabels=y_true.unique(), 
-            #             cmap='Blues')
-            # plt.title('Confusion Matrix')
-            # plt.xlabel('Predicted Type')
-            # plt.ylabel('True Type')
+            # Regular confusion matrix
+            plt.subplot(1, 2, 1)
+            sns.heatmap(conf_matrix, annot=True, fmt='d', 
+                        xticklabels=y_true.unique(), yticklabels=y_true.unique(), 
+                        cmap='Blues')
+            plt.title('Confusion Matrix')
+            plt.xlabel('Predicted Type')
+            plt.ylabel('True Type')
             
-            # # Normalized confusion matrix
-            # plt.subplot(1, 2, 2)
-            # sns.heatmap(conf_matrix_normalized, annot=True, fmt='.2f', 
-            #             xticklabels=y_true.unique(), yticklabels=y_true.unique(), 
-            #             cmap='Blues')
-            # plt.title('Normalized Confusion Matrix')
-            # plt.xlabel('Predicted Type')
-            # plt.ylabel('True Type')
+            # Normalized confusion matrix
+            plt.subplot(1, 2, 2)
+            sns.heatmap(conf_matrix_normalized, annot=True, fmt='.2f', 
+                        xticklabels=y_true.unique(), yticklabels=y_true.unique(), 
+                        cmap='Blues')
+            plt.title('Normalized Confusion Matrix')
+            plt.xlabel('Predicted Type')
+            plt.ylabel('True Type')
             
-            # # Main title
-            # plt.suptitle(f'{args.task}-{args.version}-{args.version}-{args.dataset}-{args.task}-{args.created}')
+            # Main title
+            plt.suptitle(f'{args.task}-{args.version}-{args.version}-{args.dataset}-{args.task}-{args.created}')
             
-            # # Save the plot to a buffer
-            # buffer = BytesIO()
-            # plt.savefig(buffer, format='png')
-            # buffer.seek(0)
-            # image = Image.open(buffer)
-            # image_array = np.array(image)
+            # Save the plot to a buffer
+            buffer = BytesIO()
+            plt.savefig(buffer, format='png')
+            buffer.seek(0)
+            image = Image.open(buffer)
+            image_array = np.array(image)
             
-            # # Log the image to wandb
-            # wandb.log({"Confusion Matrix (With Unanswerable, 3 types, original)": wandb.Image(image_array)})
+            # Log the image to wandb
+            wandb.log({"Confusion Matrix (With Unanswerable, 3 types, original)": wandb.Image(image_array)})
             
-            # # Close the plot
-            # plt.close()
+            # Close the plot
+            plt.close()
 
             ######################################################################
             y_true = val_prediction_csv['processed_answer_type']
@@ -331,9 +331,9 @@ def main(args):
             y_true = val_prediction_csv['small_answer_type_target']
             y_pred = val_prediction_csv['small_answer_type_prediction']
             
-            # new_item = pd.Series(["unanswerable"])
-            # y_true = pd.concat([y_true, new_item], ignore_index=True)
-            # y_pred = pd.concat([y_pred, new_item], ignore_index=True)
+            new_item = pd.Series(["unanswerable"])
+            y_true = pd.concat([y_true, new_item], ignore_index=True)
+            y_pred = pd.concat([y_pred, new_item], ignore_index=True)
             
             conf_matrix = confusion_matrix(y_true, y_pred, labels=y_true.unique())
             conf_matrix_normalized = conf_matrix.astype('float') / conf_matrix.sum(axis=1)[:, np.newaxis]
@@ -361,56 +361,56 @@ def main(args):
             wandb.log({"Confusion Matrix": wandb.Image(image_array)})
             plt.close()
 
-            # ######################################################################
-            # y_true = val_prediction_csv['answer_type']
-            # y_pred = val_prediction_csv['answer_type_prediction']
-            # conf_matrix = confusion_matrix(y_true, y_pred, labels=y_true.unique())
+            ######################################################################
+            y_true = val_prediction_csv['answer_type']
+            y_pred = val_prediction_csv['answer_type_prediction']
+            conf_matrix = confusion_matrix(y_true, y_pred, labels=y_true.unique())
             
-            # # Normalize the confusion matrix
-            # conf_matrix_normalized = conf_matrix.astype('float') / conf_matrix.sum(axis=1)[:, np.newaxis]
+            # Normalize the confusion matrix
+            conf_matrix_normalized = conf_matrix.astype('float') / conf_matrix.sum(axis=1)[:, np.newaxis]
             
-            # # Set up the matplotlib figure for side-by-side plots
-            # plt.figure(figsize=(30, 12))
+            # Set up the matplotlib figure for side-by-side plots
+            plt.figure(figsize=(30, 12))
             
-            # # Regular confusion matrix
-            # plt.subplot(1, 2, 1)
-            # sns.heatmap(conf_matrix, annot=True, fmt='d', 
-            #             xticklabels=y_true.unique(), yticklabels=y_true.unique(), 
-            #             cmap='Blues')
-            # plt.title('Confusion Matrix')
-            # plt.xlabel('Predicted Type')
-            # plt.ylabel('True Type')
+            # Regular confusion matrix
+            plt.subplot(1, 2, 1)
+            sns.heatmap(conf_matrix, annot=True, fmt='d', 
+                        xticklabels=y_true.unique(), yticklabels=y_true.unique(), 
+                        cmap='Blues')
+            plt.title('Confusion Matrix')
+            plt.xlabel('Predicted Type')
+            plt.ylabel('True Type')
             
-            # # Normalized confusion matrix
-            # plt.subplot(1, 2, 2)
-            # sns.heatmap(conf_matrix_normalized, annot=True, fmt='.2f', 
-            #             xticklabels=y_true.unique(), yticklabels=y_true.unique(), 
-            #             cmap='Blues')
-            # plt.title('Normalized Confusion Matrix')
-            # plt.xlabel('Predicted Type')
-            # plt.ylabel('True Type')
+            # Normalized confusion matrix
+            plt.subplot(1, 2, 2)
+            sns.heatmap(conf_matrix_normalized, annot=True, fmt='.2f', 
+                        xticklabels=y_true.unique(), yticklabels=y_true.unique(), 
+                        cmap='Blues')
+            plt.title('Normalized Confusion Matrix')
+            plt.xlabel('Predicted Type')
+            plt.ylabel('True Type')
             
-            # # Main title
-            # plt.suptitle(f'{args.task}-{args.version}-{args.version}-{args.dataset}-{args.task}-{args.created}')
+            # Main title
+            plt.suptitle(f'{args.task}-{args.version}-{args.version}-{args.dataset}-{args.task}-{args.created}')
             
-            # # Save the plot to a buffer
-            # buffer = BytesIO()
-            # plt.savefig(buffer, format='png')
-            # buffer.seek(0)
-            # image = Image.open(buffer)
-            # image_array = np.array(image)
+            # Save the plot to a buffer
+            buffer = BytesIO()
+            plt.savefig(buffer, format='png')
+            buffer.seek(0)
+            image = Image.open(buffer)
+            image_array = np.array(image)
             
-            # # Log the image to wandb
-            # wandb.log({"Confusion Matrix (3 types)": wandb.Image(image_array)})
+            # Log the image to wandb
+            wandb.log({"Confusion Matrix (3 types)": wandb.Image(image_array)})
             
-            # # Close the plot
-            # plt.close()
+            # Close the plot
+            plt.close()
             ######################################################################
             y_true = val_prediction_csv['processed_answer_type']
             y_pred = val_prediction_csv['processed_answer_type_prediction']
-            # new_item = pd.Series(["unanswerable"])
-            # y_true = pd.concat([y_true, new_item], ignore_index=True)
-            # y_pred = pd.concat([y_pred, new_item], ignore_index=True)
+            new_item = pd.Series(["unanswerable"])
+            y_true = pd.concat([y_true, new_item], ignore_index=True)
+            y_pred = pd.concat([y_pred, new_item], ignore_index=True)
             conf_matrix = confusion_matrix(y_true, y_pred, labels=y_true.unique())
             
             # Normalize the confusion matrix
