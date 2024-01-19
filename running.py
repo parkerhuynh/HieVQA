@@ -98,6 +98,9 @@ def main(args):
 
         #CREATE DATASET LOADERS
         train_loader, val_loader = create_loader(datasets, samplers, args)
+        for i, batch in enumerate(val_loader) :
+            print(i, len(batch[0]))
+
         print("1"*100)
         print(len(val_loader.dataset))
     
