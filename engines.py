@@ -54,8 +54,8 @@ def validator(model, data_loader, device, loss_function, args, epoch):
             
             question_id = question_id.cpu().tolist()
             predictions = vqa_predicted.cpu().tolist()
-            targets = targets.cpu().tolist()
-            for ques_id, pred, target in zip(question_id, predictions, targets):
+            answers = answers.cpu().tolist()
+            for ques_id, pred, target in zip(question_id, predictions, answers):
                 ques_id = int(ques_id)          
                 results.append({"question_id":ques_id, 
                                 "prediction":data_loader.dataset.ix_to_ans[str(pred)],

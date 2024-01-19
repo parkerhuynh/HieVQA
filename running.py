@@ -138,7 +138,7 @@ def main(args):
                 train_loader.sampler.set_epoch(epoch)
             train_stats = trainer(model, train_loader, optimizer, loss_fn, epoch, device, lr_scheduler, args, wandb)
             
-            validation_stats, val_accuraciess, val_prediction = validator(model, val_loader, device, loss_fn, args, epoch)
+            validation_stats, val_prediction = validator(model, val_loader, device, loss_fn, args, epoch)
             combine_result = collect_result(val_prediction, f'vqa_result_{args.model}_{args.task}_ {args.dataset}_epoch{epoch}', local_wdir="./temp_result")
             
             if args.wandb:
