@@ -13,7 +13,7 @@ output_dir="/home/ndhuynh/github/HieVQA/results"
 task=vqa-wo-unans # vqa-w-ans & vqa-hie
 note="vqa"
 version="v1"
-bs=256
+bs=512
 bs_test=8
 
 
