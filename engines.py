@@ -70,6 +70,7 @@ def validator(model, data_loader, device, loss_function, args, epoch):
 @torch.no_grad()
 def evaluate(model, data_loader, device):
     print()
+    metric_logger = MetricLogger(delimiter="  ")
     model.eval()
     results = []
     for i, (images, questions, answers, answer_str, question_id) in enumerate(metric_logger.log_every(data_loader, print_freq, 'Validation:')):
