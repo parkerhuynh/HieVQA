@@ -150,6 +150,8 @@ def main(args):
 
             if is_main_process() and args.wandb:
                 combine_result_csv = pd.DataFrame(combine_result)
+                print("ádasdasdasd")
+                print(combine_result_csv)
                 val_accuracies, val_prediction_csv_i = calculate_accuracies(combine_result_csv, val_dataset)
                 wandb_val_log = {**{f'val_{k}': float(v) for k, v in val_accuracies.items()}}
                 print(val_accuracies)
