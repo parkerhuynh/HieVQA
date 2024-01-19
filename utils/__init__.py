@@ -538,10 +538,10 @@ def collect_result(result, filename, local_wdir, remove_duplicate=''):
         id_list = set()
         for res in result:
             if res["question_id"] not in id_list:
-                id_list.add(res[remove_duplicate])
+                id_list.add(res["question_id"])
                 result_new.append(res)
         result = result_new
-
+        print(len(result))
         final_result_file = os.path.join(local_wdir, '%s.json' % filename)
         json.dump(result, open(final_result_file, 'w'), indent=4)
         print('result file saved to %s' % final_result_file)
