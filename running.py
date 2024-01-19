@@ -184,12 +184,12 @@ def main(args):
             print("\n")
         if is_main_process() and args.wandb:
             
-            model = torch.load(best_model_path).cuda()
-            samplers = [None, None]
-            train_loader, val_loader = create_loader(datasets, samplers, args)
-            reulsts = evaluate(model, val_loader, device)
+            # model = torch.load(best_model_path).cuda()
+            # samplers = [None, None]
+            # train_loader, val_loader = create_loader(datasets, samplers, args)
+            # reulsts = evaluate(model, val_loader, device)
             
-            val_prediction_csv = pd.DataFrame(reulsts)
+            # val_prediction_csv = pd.DataFrame(reulsts)
             val_prediction_csv.to_csv("prediction.csv", index=False)
             val_prediction_csv = val_prediction_csv.sort_values(by='question_id')
             directory = os.getcwd()
