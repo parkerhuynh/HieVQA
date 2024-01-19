@@ -532,7 +532,7 @@ def collect_result(result, filename, local_wdir, remove_duplicate=''):
         # combine results from all processes
         for rank in range(get_world_size()):
             file_path = os.path.join(local_wdir, '%s_rank%d.json' % (filename, rank))
-            result.extend(read_json_lines(file_path))[0]
+            result.extend(read_json_lines(file_path)[0])
 
         result_new = []
         id_list = set()
