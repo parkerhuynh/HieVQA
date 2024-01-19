@@ -140,7 +140,6 @@ def main(args):
             
             validation_stats, val_prediction = validator(model, val_loader, device, loss_fn, args, epoch)
             combine_result = collect_result(val_prediction, f'vqa_result_{args.model}_{args.task}_{args.dataset}_epoch{epoch}', local_wdir="./temp_result")
-            print(combine_result)
             if args.wandb:
                 wandb_train_log = {**{f'train_{k}': float(v) for k, v in train_stats.items()},
                                 'epoch': epoch}
@@ -152,8 +151,9 @@ def main(args):
             if is_main_process() and args.wandb:
                 combine_result_csv = pd.DataFrame(combine_result)
                 val_accuracies, val_prediction_csv_i = calculate_accuracies(combine_result_csv, val_dataset)
+                wandb_val_log = {**{f'val_{k}': float(v) for k, v in val_accuracies.items()}}
+                print(val_accuracies)
                 if args.wandb:
-                    wandb_val_log = {**{f'val_{k}': float(v) for k, v in val_accuracies.items()}}
                     wandb.log(wandb_val_log)
                 if hasattr(model, 'module'):
                     model_without_ddp = model.module
