@@ -272,7 +272,7 @@ def main(args):
             directory = os.getcwd()
             file_path = os.path.join(directory, f"model_{args.code_version}.onnx")
             wandb.save(file_path, directory)
-            os.re
+
             
 
 
