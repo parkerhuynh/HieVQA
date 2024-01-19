@@ -532,16 +532,15 @@ def collect_result(result, filename, local_wdir, remove_duplicate=''):
         # combine results from all processes
         for rank in range(get_world_size()):
             file_path = os.path.join(local_wdir, '%s_rank%d.json' % (filename, rank))
-            result.extend(read_json_lines(file_path))
+            result.extend(read_json_lines(file_path))[0]
 
-        if remove_duplicate:  # for evaluating captioning tasks
-            result_new = []
-            id_list = set()
-            for res in result:
-                if res[remove_duplicate] not in id_list:
-                    id_list.add(res[remove_duplicate])
-                    result_new.append(res)
-            result = result_new
+        result_new = []
+        id_list = set()
+        for res in result:
+            if res["question_id"] not in id_list:
+                id_list.add(res[remove_duplicate])
+                result_new.append(res)
+        result = result_new
 
         final_result_file = os.path.join(local_wdir, '%s.json' % filename)
         json.dump(result, open(final_result_file, 'w'), indent=4)
