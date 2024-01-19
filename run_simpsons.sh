@@ -14,7 +14,7 @@ task=vqa-wo-unans # vqa-w-ans & vqa-hie
 note="vqa"
 version="v1"
 bs=256
-bs_test=256
+bs_test=8
 
 
 # Print system information

@@ -311,7 +311,7 @@ if __name__ == '__main__':
     print_namespace_as_table(args)
     main(args)
     
-    pattern = os.path.join("./temp_result", f"vqa_result_{args.model}_{args.task}_{args.dataset}_epoch")
+    pattern = os.path.join("./temp_result", f"vqa_result_{args.model}_{args.task}_{args.dataset}_epoch_*")
     files_to_remove = glob.glob(pattern)
 
     # Iterate and remove each file
