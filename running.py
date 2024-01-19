@@ -191,6 +191,10 @@ def main(args):
             results = evaluate(model, val_loader, device)
             
             val_prediction_csv = pd.DataFrame(results)
+            val_accuracies, val_prediction_csv = calculate_accuracies(val_prediction_csv, val_dataset)
+            wandb_log_val_accuracy_best = {**{f'best_{k}': v for k, v in val_accuracies.items()}}
+            wandb.log(wandb_log_val_accuracy_best)
+            
             val_prediction_csv.to_csv("prediction.csv", index=False)
             val_prediction_csv = val_prediction_csv.sort_values(by='question_id')
             directory = os.getcwd()
