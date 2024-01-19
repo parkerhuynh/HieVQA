@@ -504,8 +504,7 @@ def get_rank():
 
 def write_json(result: list, wpath: str):
     with open(wpath, 'wt') as f:
-        for res in result:
-            f.write(json.dumps(res) + '\n')
+        json.dump(result, f)
 
 def is_main_process():
     return get_rank() == 0
@@ -514,7 +513,12 @@ def get_world_size():
     if not is_dist_avail_and_initialized():
         return 1
     return dist.get_world_size()
-           
+def read_json_lines(filepath):
+    data = []
+    with open(filepath, 'rt') as f:
+        for line in f:
+            data.append(json.loads(line))
+    return data           
 def collect_result(result, filename, local_wdir, remove_duplicate=''):
     assert isinstance(result, list)
     write_json(result, os.path.join(local_wdir,
@@ -527,8 +531,8 @@ def collect_result(result, filename, local_wdir, remove_duplicate=''):
     if is_main_process():
         # combine results from all processes
         for rank in range(get_world_size()):
-            result += read_json(os.path.join(local_wdir,
-                                             '%s_rank%d.json' % (filename, rank)))
+            file_path = os.path.join(local_wdir, '%s_rank%d.json' % (filename, rank))
+            result.extend(read_json_lines(file_path))
 
         if remove_duplicate:  # for evaluating captioning tasks
             result_new = []
