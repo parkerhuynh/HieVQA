@@ -388,21 +388,6 @@ def load_configuration(model_name, dataset_name):
     training_config = yaml.safe_load(open(f'./configs/training.yaml'))
     return model_config, data_config, training_config
 
-def setup_environment(args):
-    """Setup the training environment including distributed mode, seeds, and device."""
-    init_distributed_mode(args)
-    device = torch.device(args.device)
-    world_size = get_world_size()  # Retrieve the world size for distributed training
-    set_random_seeds(42 + get_rank())
-    cudnn.benchmark = True
-    return device, world_size
-
-def set_random_seeds(seed):
-    """Set random seeds for reproducibility."""
-    torch.manual_seed(seed)
-    np.random.seed(seed)
-    random.seed(seed)
-
         
 def initialize_wandb(args):
     """Initialize Weights & Biases tracking."""

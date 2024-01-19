@@ -21,7 +21,7 @@ import pandas as pd
 import wandb
 from datetime import datetime
 
-from engines import trainer, validator
+from engines import trainer, validator, evaluate
 import warnings
 import torch.distributed as dist
 # Hiding runtime warnings
@@ -38,13 +38,23 @@ import glob
 
 def main(args):
     print()
-    # Initialize the distributed computing environment and other settings
-    device, world_size = setup_environment(args)
+    init_distributed_mode(args)
+    device = torch.device(args.device)
+    world_size = get_world_size()
+    
     if args.bs > 0:
         args.batch_size_train = int(float(args.bs)/world_size)
     
     if args.bs_test > 0:
         args.batch_size_test = int(float(args.bs_test)/world_size)
+        
+    seed = args.seed + get_rank()
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    random.seed(seed)
+    cudnn.benchmark = True
+    
+    
     # Initialize WandB for experiment tracking, if enabled.
     if args.wandb:
         initialize_wandb(args)
@@ -98,12 +108,186 @@ def main(args):
 
         #CREATE DATASET LOADERS
         train_loader, val_loader = create_loader(datasets, samplers, args)
-        for i, batch in enumerate(val_loader) :
-            print(i, len(batch[0]))
+        args.optimizer['lr'] = float(args.optimizer['lr'])
+        args.schedular['lr'] = float(args.schedular['lr'])
+        model = get_model(args, train_dataset)
+        if is_main_process() and args.wandb:
+            batch_example = next(iter(train_loader))
+            example_image = batch_example[0]
+            example_question = batch_example[1]
+            torch.onnx.export(model, (example_image, example_question), f"model_{args.code_version}.onnx")
+        model = model.to(device)
+        
+        #OPTIMIZER and LOSS
+        arg_opt = AttrDict(args.optimizer)
+        optimizer = create_optimizer(arg_opt, model)
+        arg_sche = AttrDict(args.schedular)
+        arg_sche['step_per_epoch'] = math.ceil(train_dataset_size / (args.batch_size_train * world_size))
+        lr_scheduler = create_scheduler(arg_sche, optimizer)
+        loss_fn =  torch.nn.CrossEntropyLoss()
 
-        print("1"*100)
-        print(len(val_loader.dataset))
-    
+        # lr_scheduler = None
+        # optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
+        #SET UP
+        if args.distributed:
+            model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu], find_unused_parameters=True).to(device)
+            # model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu])
+        
+        max_epoch = args.schedular['epochs']
+        if args.debug:
+            max_epoch = 3
+            val_loader = train_loader
+        start_epoch = 0
+        best_acc = 0
+        val_prediction_csv = None
+        if is_main_process():
+            print(model)
+        for epoch in range(start_epoch, max_epoch):
+            print("\n\n" + "--"*50 + f" Epoch {epoch} " + "--"*50 + "\n")
+            if args.distributed:
+                train_loader.sampler.set_epoch(epoch)
+            train_stats = trainer(model, train_loader, optimizer, loss_fn, epoch, device, lr_scheduler, args, wandb)
+            
+            validation_stats, val_prediction = validator(model, val_loader, device, loss_fn, args, epoch)
+            combine_result = collect_result(val_prediction, f'vqa_result_{args.model}_{args.task}_{args.dataset}_epoch{epoch}', local_wdir="./temp_result")
+            if args.wandb:
+                wandb_train_log = {**{f'train_{k}': float(v) for k, v in train_stats.items()},
+                                'epoch': epoch}
+                wandb_val_log = {**{f'val_{k}': float(v) for k, v in validation_stats.items()}}
+                wandb_train_log.update(wandb_val_log)
+                wandb.log(wandb_train_log)
+
+
+            if is_main_process() and args.wandb:
+                combine_result_csv = pd.DataFrame(combine_result)
+                print(combine_result_csv)
+                val_accuracies, val_prediction_csv_i = calculate_accuracies(combine_result_csv, val_dataset)
+                wandb_val_log = {**{f'val_{k}': float(v) for k, v in val_accuracies.items()}}
+                print(val_accuracies)
+                if args.wandb:
+                    wandb.log(wandb_val_log)
+                if hasattr(model, 'module'):
+                    model_without_ddp = model.module
+                #Save model
+                val_prediction_csv = val_prediction_csv_i
+                last_model_path = os.path.join(args.output_dir, "model_latest_epoch.pt")
+                torch.save(model_without_ddp, last_model_path)
+                
+                if val_accuracies['val_accuracy_vqa(vqa-wo-unans)'] > best_acc:
+                    best_acc = val_accuracies['val_accuracy_vqa(vqa-wo-unans)']
+                    wandb_log_val_accuracy_best = {**{f'best_{k}': v for k, v in val_accuracies.items()}}
+                    wandb.log(wandb_log_val_accuracy_best)
+                    
+                    best_model_path = os.path.join(args.output_dir, "best_model_state.pt")
+                    torch.save(model_without_ddp, best_model_path)
+                    
+            print("\n")
+        if is_main_process() and args.wandb:
+            
+            model = torch.load(best_model_path).cuda()
+            samplers = [None, None]
+            train_loader, val_loader = create_loader(datasets, samplers, args)
+            reulsts = evaluate(model, val_loader, device)
+            
+            val_prediction_csv = pd.DataFrame(reulsts)
+            val_prediction_csv.to_csv("prediction.csv", index=False)
+            val_prediction_csv = val_prediction_csv.sort_values(by='question_id')
+            directory = os.getcwd()
+            file_path = os.path.join(directory, "prediction.csv")
+            wandb.save(file_path, directory)
+            
+            y_true = val_prediction_csv['small_answer_type_target']
+            y_pred = val_prediction_csv['small_answer_type_prediction']
+            conf_matrix = confusion_matrix(y_true, y_pred, labels=y_true.unique())
+            
+            # Normalize the confusion matrix
+            conf_matrix_normalized = conf_matrix.astype('float') / conf_matrix.sum(axis=1)[:, np.newaxis]
+            
+            # Set up the matplotlib figure for side-by-side plots
+            plt.figure(figsize=(30, 12))
+            
+            # Regular confusion matrix
+            plt.subplot(1, 2, 1)
+            sns.heatmap(conf_matrix, annot=True, fmt='d', 
+                        xticklabels=y_true.unique(), yticklabels=y_true.unique(), 
+                        cmap='Blues')
+            plt.title('Confusion Matrix')
+            plt.xlabel('Predicted Type')
+            plt.ylabel('True Type')
+            
+            # Normalized confusion matrix
+            plt.subplot(1, 2, 2)
+            sns.heatmap(conf_matrix_normalized, annot=True, fmt='.2f', 
+                        xticklabels=y_true.unique(), yticklabels=y_true.unique(), 
+                        cmap='Blues')
+            plt.title('Normalized Confusion Matrix')
+            plt.xlabel('Predicted Type')
+            plt.ylabel('True Type')
+            
+            # Main title
+            plt.suptitle(f'{args.task}-{args.version}-{args.version}-{args.dataset}-{args.task}-{args.created}')
+            
+            # Save the plot to a buffer
+            buffer = BytesIO()
+            plt.savefig(buffer, format='png')
+            buffer.seek(0)
+            image = Image.open(buffer)
+            image_array = np.array(image)
+            
+            # Log the image to wandb
+            wandb.log({"Confusion Matrix": wandb.Image(image_array)})
+            
+            # Close the plot
+            plt.close()
+            
+            y_true = val_prediction_csv['answer_type']
+            y_pred = val_prediction_csv['answer_type_prediction']
+            conf_matrix = confusion_matrix(y_true, y_pred, labels=y_true.unique())
+            
+            # Normalize the confusion matrix
+            conf_matrix_normalized = conf_matrix.astype('float') / conf_matrix.sum(axis=1)[:, np.newaxis]
+            
+            # Set up the matplotlib figure for side-by-side plots
+            plt.figure(figsize=(30, 12))
+            
+            # Regular confusion matrix
+            plt.subplot(1, 2, 1)
+            sns.heatmap(conf_matrix, annot=True, fmt='d', 
+                        xticklabels=y_true.unique(), yticklabels=y_true.unique(), 
+                        cmap='Blues')
+            plt.title('Confusion Matrix')
+            plt.xlabel('Predicted Type')
+            plt.ylabel('True Type')
+            
+            # Normalized confusion matrix
+            plt.subplot(1, 2, 2)
+            sns.heatmap(conf_matrix_normalized, annot=True, fmt='.2f', 
+                        xticklabels=y_true.unique(), yticklabels=y_true.unique(), 
+                        cmap='Blues')
+            plt.title('Normalized Confusion Matrix')
+            plt.xlabel('Predicted Type')
+            plt.ylabel('True Type')
+            
+            # Main title
+            plt.suptitle(f'{args.task}-{args.version}-{args.version}-{args.dataset}-{args.task}-{args.created}')
+            
+            # Save the plot to a buffer
+            buffer = BytesIO()
+            plt.savefig(buffer, format='png')
+            buffer.seek(0)
+            image = Image.open(buffer)
+            image_array = np.array(image)
+            
+            # Log the image to wandb
+            wandb.log({"Confusion Matrix (3 types)": wandb.Image(image_array)})
+            
+            # Close the plot
+            plt.close()
+                    
+            directory = os.getcwd()
+            file_path = os.path.join(directory, f"model_{args.code_version}.onnx")
+            wandb.save(file_path, directory)
+
             
 
 
@@ -126,6 +310,8 @@ if __name__ == '__main__':
     parser.add_argument('--wandb', action='store_true')
     parser.add_argument('--wandb_dir', type=str, help="for fine-tuning")
     parser.add_argument('--checkpoint', type=str, default='')
+    parser.add_argument('--seed', default=42, type=int)
+    
     args = parser.parse_args()
 
     #Check data path
@@ -142,7 +328,7 @@ if __name__ == '__main__':
     print_namespace_as_table(args)
     main(args)
     
-    pattern = os.path.join("./temp_result", f"vqa_result_{args.model}_{args.task}_{args.dataset}_epoch")
+    pattern = os.path.join("./temp_result", f"vqa_result_{args.model}_{args.task}_{args.dataset}_epoch_*")
     files_to_remove = glob.glob(pattern)
 
     # Iterate and remove each file

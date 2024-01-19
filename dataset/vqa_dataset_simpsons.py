@@ -30,8 +30,6 @@ class VQADataset(Dataset):
         
         self.questions = self.load_questions()
         self.annotations, self.idx_to_ann  = self.load_annotations() if split != 'test' else ([], [])
-        
-        random.shuffle(self.annotations)
 
         
     def load_json_file(self, file_path):
