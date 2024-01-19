@@ -73,7 +73,7 @@ def evaluate(model, data_loader, device):
     metric_logger = MetricLogger(delimiter="  ")
     model.eval()
     results = []
-    for i, (images, questions, answers, answer_str, question_id) in enumerate(metric_logger.log_every(data_loader, print_freq, 'Validation:')):
+    for i, (images, questions, answers, answer_str, question_id) in enumerate(metric_logger.log_every(data_loader, 20, 'Evaluating:')):
         with torch.no_grad():
             images, questions, answers, question_id= images.to(device), questions.to(device), answers.to(device), question_id.to(device)
             vqa_outputs = model(images, questions)
