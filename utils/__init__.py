@@ -549,4 +549,4 @@ def collect_result(result, filename, local_wdir, remove_duplicate=''):
 
     dist.barrier()
 
-    return final_result_file
+    return result

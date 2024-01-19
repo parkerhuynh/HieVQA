@@ -139,7 +139,7 @@ def main(args):
             train_stats = trainer(model, train_loader, optimizer, loss_fn, epoch, device, lr_scheduler, args, wandb)
             
             validation_stats, val_prediction = validator(model, val_loader, device, loss_fn, args, epoch)
-            combine_result = collect_result(val_prediction, f'vqa_result_{args.model}_{args.task}_ {args.dataset}_epoch{epoch}', local_wdir="./temp_result")
+            combine_result = collect_result(val_prediction, f'vqa_result_{args.model}_{args.task}_{args.dataset}_epoch{epoch}', local_wdir="./temp_result")
             print(combine_result)
             if args.wandb:
                 wandb_train_log = {**{f'train_{k}': float(v) for k, v in train_stats.items()},
@@ -309,7 +309,7 @@ if __name__ == '__main__':
     print_namespace_as_table(args)
     main(args)
     
-    pattern = os.path.join("./temp_result", f"vqa_result_{args.model}_{args.task}_ {args.dataset}_epoch")
+    pattern = os.path.join("./temp_result", f"vqa_result_{args.model}_{args.task}_{args.dataset}_epoch")
     files_to_remove = glob.glob(pattern)
 
     # Iterate and remove each file
