@@ -100,7 +100,7 @@ def main(args):
         train_loader, val_loader = create_loader(datasets, samplers, args)
         args.optimizer['lr'] = float(args.optimizer['lr'])
         args.schedular['lr'] = float(args.schedular['lr'])
-        odel = get_model(args, train_dataset)
+        model = get_model(args, train_dataset)
         if is_main_process() and args.wandb:
             batch_example = next(iter(train_loader))
             example_image = batch_example[0]
@@ -272,7 +272,6 @@ def main(args):
             directory = os.getcwd()
             file_path = os.path.join(directory, f"model_{args.code_version}.onnx")
             wandb.save(file_path, directory)
-
             
 
 
@@ -318,4 +317,4 @@ if __name__ == '__main__':
     for file_path in files_to_remove:
         if os.path.isfile(file_path):  # Check if it's a file
             os.remove(file_path)
-    m
+    
