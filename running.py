@@ -140,7 +140,7 @@ def main(args):
             
             validation_stats, val_prediction = validator(model, val_loader, device, loss_fn, args, epoch)
             combine_result = collect_result(val_prediction, f'vqa_result_{args.model}_{args.task}_ {args.dataset}_epoch{epoch}', local_wdir="./temp_result")
-            
+            print(combine_result)
             if args.wandb:
                 wandb_train_log = {**{f'train_{k}': float(v) for k, v in train_stats.items()},
                                 'epoch': epoch}
