@@ -496,3 +496,53 @@ def list_files_and_subdirectories(path,args):
         else:
             filtered_list.append(file)
     return filtered_list
+
+def get_rank():
+    if not is_dist_avail_and_initialized():
+        return 0
+    return dist.get_rank()
+
+def write_json(result: list, wpath: str):
+    with open(wpath, 'wt') as f:
+        for res in result:
+            f.write(json.dumps(res) + '\n')
+
+def is_main_process():
+    return get_rank() == 0
+
+def get_world_size():
+    if not is_dist_avail_and_initialized():
+        return 1
+    return dist.get_world_size()
+           
+def collect_result(result, filename, local_wdir, remove_duplicate=''):
+    assert isinstance(result, list)
+    write_json(result, os.path.join(local_wdir,
+                                    '%s_rank%d.json' % (filename, get_rank())))
+    dist.barrier()
+
+
+    result = []
+    final_result_file = ''
+    if is_main_process():
+        # combine results from all processes
+        for rank in range(get_world_size()):
+            result += read_json(os.path.join(local_wdir,
+                                             '%s_rank%d.json' % (filename, rank)))
+
+        if remove_duplicate:  # for evaluating captioning tasks
+            result_new = []
+            id_list = set()
+            for res in result:
+                if res[remove_duplicate] not in id_list:
+                    id_list.add(res[remove_duplicate])
+                    result_new.append(res)
+            result = result_new
+
+        final_result_file = os.path.join(local_wdir, '%s.json' % filename)
+        json.dump(result, open(final_result_file, 'w'), indent=4)
+        print('result file saved to %s' % final_result_file)
+
+    dist.barrier()
+
+    return final_result_file

@@ -4,7 +4,7 @@ import math
 import numpy as np
 import random
 import time
-
+from metrics import calculate_accuracies
 import json
 from pathlib import Path
 import yaml
@@ -34,7 +34,7 @@ from io import BytesIO
 from PIL import Image
 import numpy as np
 import torch.onnx
-
+import glob
 
 def main(args):
     print()
@@ -138,8 +138,9 @@ def main(args):
                 train_loader.sampler.set_epoch(epoch)
             train_stats = trainer(model, train_loader, optimizer, loss_fn, epoch, device, lr_scheduler, args, wandb)
             
-            validation_stats, val_accuraciess, val_prediction_csv_i = validator(model, val_loader, device, loss_fn, args, epoch)
-
+            validation_stats, val_accuraciess, val_prediction = validator(model, val_loader, device, loss_fn, args, epoch)
+            combine_result = collect_result(val_prediction, f'vqa_result_{args.model}_{args.task}_ {args.dataset}_epoch{epoch}', local_wdir="./temp_result")
+            
             if args.wandb:
                 wandb_train_log = {**{f'train_{k}': float(v) for k, v in train_stats.items()},
                                 'epoch': epoch}
@@ -149,6 +150,11 @@ def main(args):
 
 
             if is_main_process() and args.wandb:
+                combine_result_csv = pd.DataFrame(combine_result)
+                val_accuracies, val_prediction_csv_i = calculate_accuracies(val_prediction_csv, val_dataset)
+                if args.wandb:
+                    wandb_val_log = {**{f'val_{k}': float(v) for k, v in val_accuracies.items()}}
+                    wandb.log(wandb_val_log)
                 if hasattr(model, 'module'):
                     model_without_ddp = model.module
                 #Save model
@@ -156,9 +162,9 @@ def main(args):
                 last_model_path = os.path.join(args.output_dir, "model_latest_epoch.pt")
                 torch.save(model_without_ddp, last_model_path)
                 
-                if val_accuraciess['val_accuracy_vqa(vqa-wo-unans)'] > best_acc:
-                    best_acc = val_accuraciess['val_accuracy_vqa(vqa-wo-unans)']
-                    wandb_log_val_accuracy_best = {**{f'best_{k}': v for k, v in val_accuraciess.items()}}
+                if val_accuracies['val_accuracy_vqa(vqa-wo-unans)'] > best_acc:
+                    best_acc = val_accuracies['val_accuracy_vqa(vqa-wo-unans)']
+                    wandb_log_val_accuracy_best = {**{f'best_{k}': v for k, v in val_accuracies.items()}}
                     wandb.log(wandb_log_val_accuracy_best)
                     
                     best_model_path = os.path.join(args.output_dir, "best_model_state.pt")
@@ -217,11 +223,6 @@ def main(args):
             # Close the plot
             plt.close()
             
-            
-            
-            
-            
-            
             y_true = val_prediction_csv['answer_type']
             y_pred = val_prediction_csv['answer_type_prediction']
             conf_matrix = confusion_matrix(y_true, y_pred, labels=y_true.unique())
@@ -269,7 +270,7 @@ def main(args):
             directory = os.getcwd()
             file_path = os.path.join(directory, f"model_{args.code_version}.onnx")
             wandb.save(file_path, directory)
-            
+            os.re
             
 
 
@@ -307,5 +308,12 @@ if __name__ == '__main__':
     vars(args).update(training_config)
     print_namespace_as_table(args)
     main(args)
+    
+    pattern = os.path.join("./temp_result", f"vqa_result_{args.model}_{args.task}_ {args.dataset}_epoch")
+    files_to_remove = glob.glob(pattern)
 
+    # Iterate and remove each file
+    for file_path in files_to_remove:
+        if os.path.isfile(file_path):  # Check if it's a file
+            os.remove(file_path)
     

@@ -40,12 +40,10 @@ def calculate_vqa_accuracy(result_data):
 def calculate_accuracies(df, dataset):
     with open("./dataset/super_answer_type_simpsons.json", 'r') as file:
         super_type = json.load(file)
-    df["prediction class"] = df["prediction"].apply(lambda x: dataset.ix_to_ans[str(x)])
-    df["target class"] = df["target"].apply(lambda x: dataset.ix_to_ans[str(x)])
     df["answer_type"] = df["id"].apply(lambda x: dataset.idx_to_ann[x]["answer_type"])
     
-    df["small_answer_type_target"] = df["target class"].apply(lambda x: super_type[x])
-    df["small_answer_type_prediction"] = df["prediction class"].apply(lambda x: super_type[x])
+    df["small_answer_type_target"] = df["target"].apply(lambda x: super_type[x])
+    df["small_answer_type_prediction"] = df["prediction"].apply(lambda x: super_type[x])
     
     df["answer_type"] =  df["small_answer_type_target"].apply(lambda x: x if x in ["yes/no", "number"] else "other")
     df["answer_type_prediction"] =  df["small_answer_type_prediction"].apply(lambda x: x if x in ["yes/no", "number"] else "other")
