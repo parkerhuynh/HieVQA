@@ -163,11 +163,11 @@ def main(args):
                 combine_result_csv = pd.DataFrame(combine_result)
                 val_accuracies, val_prediction_csv_i = calculate_accuracies(combine_result_csv, val_dataset)
                 
-                wandb_val_log = {**{f'val_{k}': float(v) for k, v in val_accuracies.items()}}
-                wandb_val_log.update({
+                # wandb_val_log = {**{f'val_{k}': float(v) for k, v in val_accuracies.items()}}
+                val_accuracies.update({
                     "epoch": epoch
                 })
-                wandb.log(wandb_val_log)
+                wandb.log(val_accuracies)
                 if hasattr(model, 'module'):
                     model_without_ddp = model.module
                 #Save model
@@ -342,3 +342,4 @@ if __name__ == '__main__':
     for file_path in files_to_remove:
         if os.path.isfile(file_path):  # Check if it's a file
             os.remove(file_path)
+    

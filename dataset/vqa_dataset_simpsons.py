@@ -30,8 +30,6 @@ class VQADataset(Dataset):
         
         self.questions = self.load_questions()
         self.annotations, self.idx_to_ann  = self.load_annotations() if split != 'test' else ([], [])
-        
-        random.shuffle(self.annotations)
 
         
     def load_json_file(self, file_path):
@@ -127,7 +125,7 @@ class VQADataset(Dataset):
         if self.split != 'test':
             return image, question, ann["answer_idx"], ann['answer'], ann['id']
         else:
-            return image, question, ques['id']
+            return image, question, ann['id']
     
     def __getitem__(self, index):
         
@@ -145,14 +143,17 @@ class VQADataset(Dataset):
             
 
 def annotation_preprocessing( anns):
+    id = []
     proccesed_anns = []
+    
     for ann in anns:
         ans_count = 0
         for judge in ann["judgements"].values():
             if judge["answer"] == 1:
                 ans_count += 1
-        if ans_count >= 2:
+        if ans_count >= 2 and ann["id"] not in id:
             ann["question_label"]= 1
+            id.append(ann["id"])
             ann["answer"] = prep_ans(ann["answer"])
             proccesed_anns.append(ann)
     return proccesed_anns
