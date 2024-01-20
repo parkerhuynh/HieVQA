@@ -170,11 +170,12 @@ def main(args):
                 if hasattr(model, 'module'):
                     model_without_ddp = model.module
                 #Save model
-                val_prediction_csv = val_prediction_csv_i
+                
                 last_model_path = os.path.join(args.output_dir, "model_latest_epoch.pt")
                 torch.save(model_without_ddp, last_model_path)
                 
                 if val_accuracies['val_accuracy_vqa(vqa-wo-unans)'] > best_acc:
+                    val_prediction_csv = val_prediction_csv_i
                     best_acc = val_accuracies['val_accuracy_vqa(vqa-wo-unans)']
                     wandb_log_val_accuracy_best = {**{f'best_{k}': v for k, v in val_accuracies.items()}}
                     wandb.log(wandb_log_val_accuracy_best)
@@ -185,15 +186,15 @@ def main(args):
             print("\n")
         if is_main_process() and args.wandb:
             
-            model = torch.load(best_model_path).cuda()
-            samplers = [None, None]
-            train_loader, val_loader = create_loader(datasets, samplers, args)
-            results = evaluate(model, val_loader, device)
+            # model = torch.load(best_model_path).cuda()
+            # samplers = [None, None]
+            # train_loader, val_loader = create_loader(datasets, samplers, args)
+            # results = evaluate(model, val_loader, device)
             
-            val_prediction_csv = pd.DataFrame(results)
-            val_accuracies, val_prediction_csv = calculate_accuracies(val_prediction_csv, val_dataset)
-            wandb_log_val_accuracy_best = {**{f'best_{k}': v for k, v in val_accuracies.items()}}
-            wandb.log(wandb_log_val_accuracy_best)
+            # val_prediction_csv = pd.DataFrame(results)
+            # val_accuracies, val_prediction_csv = calculate_accuracies(val_prediction_csv, val_dataset)
+            # wandb_log_val_accuracy_best = {**{f'best_{k}': v for k, v in val_accuracies.items()}}
+            # wandb.log(wandb_log_val_accuracy_best)
             
             val_prediction_csv.to_csv("prediction.csv", index=False)
             val_prediction_csv = val_prediction_csv.sort_values(by='question_id')
