@@ -39,12 +39,22 @@ import torch.onnx
 def main(args):
     print()
     # Initialize the distributed computing environment and other settings
-    device, world_size = setup_environment(args)
+    print()
+    init_distributed_mode(args)
+    device = torch.device(args.device)
+    world_size = get_world_size()
+    
     if args.bs > 0:
         args.batch_size_train = int(float(args.bs)/world_size)
     
     if args.bs_test > 0:
         args.batch_size_test = int(float(args.bs_test)/world_size)
+        
+    seed = args.seed + get_rank()
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    random.seed(seed)
+    cudnn.benchmark = True
     # Initialize WandB for experiment tracking, if enabled.
     if args.wandb:
         initialize_wandb(args)
@@ -478,6 +488,7 @@ if __name__ == '__main__':
     parser.add_argument('--wandb', action='store_true')
     parser.add_argument('--wandb_dir', type=str, help="for fine-tuning")
     parser.add_argument('--checkpoint', type=str, default='')
+    parser.add_argument('--seed', default=42, type=int)
     args = parser.parse_args()
 
     #Check data path
