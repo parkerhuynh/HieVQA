@@ -162,13 +162,12 @@ def main(args):
                 
                 combine_result_csv = pd.DataFrame(combine_result)
                 val_accuracies, val_prediction_csv_i = calculate_accuracies(combine_result_csv, val_dataset)
-                val_accuracies.update({
+                
+                wandb_val_log = {**{f'val_{k}': float(v) for k, v in val_accuracies.items()}}
+                wandb_val_log.update({
                     "epoch": epoch
                 })
-                wandb_val_log = {**{f'val_{k}': float(v) for k, v in val_accuracies.items()}}
-                print(val_accuracies)
-                if args.wandb:
-                    wandb.log(wandb_val_log)
+                wandb.log(wandb_val_log)
                 if hasattr(model, 'module'):
                     model_without_ddp = model.module
                 #Save model
