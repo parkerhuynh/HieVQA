@@ -13,8 +13,8 @@ output_dir="/home/ndhuynh/github/HieVQA/results"
 task=vqa-wo-unans # vqa-w-ans & vqa-hie
 note="vqa"
 version="v1"
-bs=256
-bs_test=256
+bs=128
+bs_test=128
 
 
 # Print system information
