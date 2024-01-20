@@ -4,7 +4,7 @@ import math
 import numpy as np
 import random
 import time
-
+from metrics import calculate_accuracies
 import json
 from pathlib import Path
 import yaml
@@ -21,7 +21,7 @@ import pandas as pd
 import wandb
 from datetime import datetime
 
-from engines import trainer, validator
+from engines import trainer, validator, evaluate
 import warnings
 import torch.distributed as dist
 # Hiding runtime warnings
@@ -34,17 +34,27 @@ from io import BytesIO
 from PIL import Image
 import numpy as np
 import torch.onnx
-
+import glob
 
 def main(args):
     print()
-    # Initialize the distributed computing environment and other settings
-    device, world_size = setup_environment(args)
+    init_distributed_mode(args)
+    device = torch.device(args.device)
+    world_size = get_world_size()
+    
     if args.bs > 0:
         args.batch_size_train = int(float(args.bs)/world_size)
     
     if args.bs_test > 0:
         args.batch_size_test = int(float(args.bs_test)/world_size)
+        
+    seed = args.seed + get_rank()
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    random.seed(seed)
+    cudnn.benchmark = True
+    
+    
     # Initialize WandB for experiment tracking, if enabled.
     if args.wandb:
         initialize_wandb(args)
@@ -138,8 +148,8 @@ def main(args):
                 train_loader.sampler.set_epoch(epoch)
             train_stats = trainer(model, train_loader, optimizer, loss_fn, epoch, device, lr_scheduler, args, wandb)
             
-            validation_stats, val_accuraciess, val_prediction_csv_i = validator(model, val_loader, device, loss_fn, args, epoch)
-
+            validation_stats, val_prediction = validator(model, val_loader, device, loss_fn, args, epoch)
+            combine_result = collect_result(val_prediction, f'vqa_result_{args.model}_{args.task}_{args.dataset}_epoch{epoch}', local_wdir="./temp_result")
             if args.wandb:
                 wandb_train_log = {**{f'train_{k}': float(v) for k, v in train_stats.items()},
                                 'epoch': epoch}
@@ -149,16 +159,27 @@ def main(args):
 
 
             if is_main_process() and args.wandb:
+                
+                combine_result_csv = pd.DataFrame(combine_result)
+                val_accuracies, val_prediction_csv_i = calculate_accuracies(combine_result_csv, val_dataset)
+                val_accuracies.update({
+                    "epoch": epoch
+                })
+                wandb_val_log = {**{f'val_{k}': float(v) for k, v in val_accuracies.items()}}
+                print(val_accuracies)
+                if args.wandb:
+                    wandb.log(wandb_val_log)
                 if hasattr(model, 'module'):
                     model_without_ddp = model.module
                 #Save model
-                val_prediction_csv = val_prediction_csv_i
+                
                 last_model_path = os.path.join(args.output_dir, "model_latest_epoch.pt")
                 torch.save(model_without_ddp, last_model_path)
                 
-                if val_accuraciess['val_accuracy_vqa(vqa-wo-unans)'] > best_acc:
-                    best_acc = val_accuraciess['val_accuracy_vqa(vqa-wo-unans)']
-                    wandb_log_val_accuracy_best = {**{f'best_{k}': v for k, v in val_accuraciess.items()}}
+                if val_accuracies['val_accuracy_vqa(vqa-wo-unans)'] > best_acc:
+                    val_prediction_csv = val_prediction_csv_i
+                    best_acc = val_accuracies['val_accuracy_vqa(vqa-wo-unans)']
+                    wandb_log_val_accuracy_best = {**{f'best_{k}': v for k, v in val_accuracies.items()}}
                     wandb.log(wandb_log_val_accuracy_best)
                     
                     best_model_path = os.path.join(args.output_dir, "best_model_state.pt")
@@ -167,8 +188,18 @@ def main(args):
             print("\n")
         if is_main_process() and args.wandb:
             
+            # model = torch.load(best_model_path).cuda()
+            # samplers = [None, None]
+            # train_loader, val_loader = create_loader(datasets, samplers, args)
+            # results = evaluate(model, val_loader, device)
+            
+            # val_prediction_csv = pd.DataFrame(results)
+            # val_accuracies, val_prediction_csv = calculate_accuracies(val_prediction_csv, val_dataset)
+            # wandb_log_val_accuracy_best = {**{f'best_{k}': v for k, v in val_accuracies.items()}}
+            # wandb.log(wandb_log_val_accuracy_best)
+            
             val_prediction_csv.to_csv("prediction.csv", index=False)
-            val_prediction_csv = val_prediction_csv.sort_values(by='id')
+            val_prediction_csv = val_prediction_csv.sort_values(by='question_id')
             directory = os.getcwd()
             file_path = os.path.join(directory, "prediction.csv")
             wandb.save(file_path, directory)
@@ -217,11 +248,6 @@ def main(args):
             # Close the plot
             plt.close()
             
-            
-            
-            
-            
-            
             y_true = val_prediction_csv['answer_type']
             y_pred = val_prediction_csv['answer_type_prediction']
             conf_matrix = confusion_matrix(y_true, y_pred, labels=y_true.unique())
@@ -269,7 +295,7 @@ def main(args):
             directory = os.getcwd()
             file_path = os.path.join(directory, f"model_{args.code_version}.onnx")
             wandb.save(file_path, directory)
-            
+
             
 
 
@@ -292,6 +318,8 @@ if __name__ == '__main__':
     parser.add_argument('--wandb', action='store_true')
     parser.add_argument('--wandb_dir', type=str, help="for fine-tuning")
     parser.add_argument('--checkpoint', type=str, default='')
+    parser.add_argument('--seed', default=42, type=int)
+    
     args = parser.parse_args()
 
     #Check data path
@@ -307,5 +335,12 @@ if __name__ == '__main__':
     vars(args).update(training_config)
     print_namespace_as_table(args)
     main(args)
+    
+    pattern = os.path.join("./temp_result", f"vqa_result_{args.model}_{args.task}_{args.dataset}_epoch_*")
+    files_to_remove = glob.glob(pattern)
 
+    # Iterate and remove each file
+    for file_path in files_to_remove:
+        if os.path.isfile(file_path):  # Check if it's a file
+            os.remove(file_path)
     
