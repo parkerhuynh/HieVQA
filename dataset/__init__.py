@@ -38,7 +38,7 @@ def create_dataset(args, istrain=True):
 
     if args.checkpoint == "":
         train_dataset = vqa_dataset(args, train_transform_wohflip, split='train')
-        val_dataset = vqa_dataset(args, train_transform_wohflip, split='val')
+        val_dataset = vqa_dataset(args, test_transform, split='val')
         
         return train_dataset, val_dataset
     else:
@@ -76,7 +76,7 @@ def create_loader(datasets, samplers, args, istrain=True):
         train_loader = DataLoader(
             train_dataset,
             batch_size=args.batch_size_train,
-            num_workers=16,
+            num_workers=4,
             pin_memory=True,
             sampler=train_samples,
             shuffle=train_shuffle,
@@ -86,7 +86,7 @@ def create_loader(datasets, samplers, args, istrain=True):
         val_loader = DataLoader(
             val_dataset,
             batch_size=args.batch_size_test,
-            num_workers=16,
+            num_workers=4,
             pin_memory=True,
             sampler=val_samples,
             shuffle=False,

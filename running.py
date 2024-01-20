@@ -342,4 +342,3 @@ if __name__ == '__main__':
     for file_path in files_to_remove:
         if os.path.isfile(file_path):  # Check if it's a file
             os.remove(file_path)
-    
