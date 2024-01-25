@@ -179,7 +179,7 @@ def main(args):
             
             val_prediction_csv.to_csv("prediction.csv", index=False)
             val_prediction_csv = val_prediction_csv.sort_values(by='id')
-            print(val_prediction_csv["id"].value_counts())
+           
             directory = os.getcwd()
             file_path = os.path.join(directory, "prediction.csv")
             wandb.save(file_path, directory)

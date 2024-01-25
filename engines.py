@@ -86,6 +86,7 @@ def validator(model, data_loader, device, loss_function, args, epoch):
             "prediction": final_predictions,
             "target":final_targets
         }
+        print(val_prediction_csv["id"].value_counts())
         val_prediction_csv = pd.DataFrame(val_prediction_csv)
         val_accuracies, val_prediction_csv = calculate_accuracies(val_prediction_csv, data_loader.dataset)
         
