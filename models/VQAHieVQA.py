@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from torchvision import models
-
+from transformers import BertTokenizer, BertForSequenceClassification, AdamW
 class ImageEncoder(nn.Module):
 
     def __init__(self, image_feature_output=1024):
@@ -115,7 +115,8 @@ class VQAHieVQA(nn.Module):
             hidden_size=args.model_config["rnn_hidden_size"])
         
         self.vqa_mlp = VQA_header(ans_vocab_type_dict)
-        self.question_type_mlp = QuestionType(args, idx_to_answer_type)
+        self.question_type_mlp = BertForSequenceClassification.from_pretrained('bert-base-uncased', num_labels=len(idx_to_answer_type))
+        
     def debug_print(self, message):
         """
         Prints debug information if debug mode is enabled.
@@ -123,11 +124,12 @@ class VQAHieVQA(nn.Module):
         if self.args.debug_print:
             print(message)
 
-    def forward(self, image, question):
+    def forward(self, image, question_rnn, question_bert):
         image = self.image_encoder(image)
-        question = self.word_embeddings(question)
-        question = self.question_encoder(question)
-        combine_features = image*question
-        question_type_output = self.question_type_mlp(combine_features)
+        question_rnn = self.word_embeddings(question_rnn)
+        question_rnn = self.question_encoder(question_rnn)
+        combine_features = image*question_rnn
+        
+        question_type_output = self.question_type_mlp(question_bert)
         vqa_outputs =  self.vqa_mlp(combine_features)
         return question_type_output, vqa_outputs

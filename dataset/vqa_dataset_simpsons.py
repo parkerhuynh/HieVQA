@@ -159,7 +159,7 @@ class VQADataset(Dataset):
         
         data = {
             "image": image,
-            "question": question,
+            "question_rnn": question,
             "answer": ann["answer_idx"],
             "answer_type": ann['answer_type_idx'],
             "question_id": ann['id'],

@@ -16,10 +16,24 @@ def trainer(model, data_loader, optimizer, loss_function, epoch, device, schedul
     header = f'Train Epoch: [{epoch}]'
     print_freq = args.print_freq
     
-    for i, (images, questions, answers, answer_type, question_id) in enumerate(metric_logger.log_every(data_loader, print_freq, header)):
-    
-        images, questions, answers, answer_type= images.to(device), questions.to(device), answers.to(device), answer_type.to(device)
-        qt_output, vqa_outputs = model(images, questions)
+    for i, batch in enumerate(metric_logger.log_every(data_loader, print_freq, header)):
+        
+        # data = {
+        #     "image": image,
+        #     "question_rnn": question,
+        #     "answer": ann["answer_idx"],
+        #     "answer_type": ann['answer_type_idx'],
+        #     "question_id": ann['id'],
+        #     "question_text": ques["question_str"],
+        #     "input_ids": encoding['input_ids'].flatten(),
+        #     "attention_mask": encoding['attention_mask'].flatten()
+        # }
+        images = batch["image"].to(device)
+        questions_rnn = batch["image"].to(device)
+        answer_type = batch["answer_type"].to(device)
+        answers = batch["answers"].to(device)
+        question_bert = batch["answers"].to(device)
+        qt_output, vqa_outputs = model(images, questions_rnn, question_bert)
 
         qt_loss, vqa_loss, total_loss = loss_function(qt_output, answer_type, vqa_outputs, answers)
         
