@@ -157,9 +157,11 @@ def create_ann_vocal(examples, args, super_types):
     id = {}
     for ex in examples[:10]:
         print(ex)
+        print(super_types)
     
     for ex in examples:
         ans_str = ex["answer"]
+        
         ans_type = super_types[ans_str]
         if ans_str != "unanswerable":
             if ans_type not in ans2tok:
