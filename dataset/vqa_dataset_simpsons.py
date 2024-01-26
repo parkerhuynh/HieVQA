@@ -19,6 +19,7 @@ import json
 import torch
 from torch.utils.data import Dataset
 
+
 class VQADataset(Dataset):
     def __init__(self, args, transform, split='train'):
         self.transform = transform
@@ -62,6 +63,7 @@ class VQADataset(Dataset):
         for ques in ques_list:
             qid = str(ques['id'])
             ques['img_path'] = os.path.join(img_path, ques['img_path'])
+            ques['question_str'] = ques['question']
             ques['question'] = rnn_proc_ques(ques["question"], self.token_to_ix, self.args.max_ques_len)
             qid_to_ques_dict[qid] = ques
         return qid_to_ques_dict
@@ -114,6 +116,8 @@ class VQADataset(Dataset):
 
         token_to_ix, pretrained_emb = question_vocal(stat_ques_list, self.args)
         token_size = len(token_to_ix)
+        
+        
         return token_to_ix, pretrained_emb, token_size
     
     def prepare_answer_vocab(self):
@@ -131,10 +135,6 @@ class VQADataset(Dataset):
         
     
     def __len__(self):
-        # if self.args.debug:
-        #     return self.args.batch_size_train*4
-        # if self.split == "train":
-        #     return self.args.batch_size_train*4
         return len(self.annotations)
     
     
@@ -144,9 +144,29 @@ class VQADataset(Dataset):
         """
         # question = rnn_proc_ques(ques["question"], self.token_to_ix, self.args.max_ques_len)
         question=  torch.from_numpy(ques["question"])
-        # print(ques)
-        # print(ann)
-        # print(ann["answer_idx"], ann['answer_type_idx'], ann['id'])
+        encoding = self.tokenizer.encode_plus(
+            ques["question_str"],
+            add_special_tokens=True,
+            max_length=self.args.max_ques_len,
+            return_token_type_ids=False,
+            padding='max_length',
+            truncation=True,
+            return_attention_mask=True,
+            return_tensors='pt',
+        )
+        
+        
+        data = {
+            "image": image,
+            "question": question,
+            "answer": ann["answer_idx"],
+            "answer_type": ann['answer_type_idx'],
+            "question_id": ann['id'],
+            "question_text": ques["question_str"],
+            "input_ids": encoding['input_ids'].flatten(),
+            "attention_mask": encoding['attention_mask'].flatten()
+        }
+        print(data)
         return image, question, ann["answer_idx"], ann['answer_type_idx'], ann['id']
     
     def __getitem__(self, index):
