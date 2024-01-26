@@ -26,7 +26,7 @@ class VQADataset(Dataset):
         self.split = split
         self.args = args
         self.token_to_ix, self.pretrained_emb, self.token_size = self.prepare_question_vocab()
-        self.super_types = self.load_json_file('/home/reda/scratch/ngoc/code/HieVQA/dataset/super_answer_type_simpsons.json')
+        self.super_types = self.load_json_file('/dataset/super_answer_type_simpsons.json')
         self.ans_to_ix, self.ix_to_ans = self.prepare_answer_vocab()
         self.ans_size = len(self.ans_to_ix)
         self.ans_type_to_idx = {}

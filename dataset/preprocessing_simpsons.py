@@ -155,9 +155,6 @@ def prep_ans(answer):
 def create_ann_vocal(examples, args, super_types):
     ans2tok, tok2ans = {}, {}
     id = {}
-    for ex in examples[:10]:
-        print(ex)
-        print(super_types)
     
     for ex in examples:
         ans_str = ex["answer"]
