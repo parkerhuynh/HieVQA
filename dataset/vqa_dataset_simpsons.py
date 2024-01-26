@@ -167,9 +167,10 @@ class VQADataset(Dataset):
             "input_ids": encoding['input_ids'].flatten(),
             "attention_mask": encoding['attention_mask'].flatten()
         }
-        print(data)
-        a
-        return image, question, ann["answer_idx"], ann['answer_type_idx'], ann['id']
+        # print(data)
+        # a
+        # return image, question, ann["answer_idx"], ann['answer_type_idx'], ann['id']
+        return data
     
     def __getitem__(self, index):
         
