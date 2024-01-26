@@ -31,6 +31,7 @@ class VQADataset(Dataset):
         self.ans_size = len(self.ans_to_ix)
         self.ans_type_to_idx = {}
         self.idx_to_ans_type = {}
+        self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
         
         for i, ans_type in enumerate(self.ans_to_ix.keys()):
             self.ans_type_to_idx[ans_type] = i
