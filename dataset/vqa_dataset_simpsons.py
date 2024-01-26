@@ -164,8 +164,8 @@ class VQADataset(Dataset):
             "answer_type": ann['answer_type_idx'],
             "question_id": ann['id'],
             "question_text": ques["question_str"],
-            "input_ids": encoding['input_ids'].flatten(),
-            "attention_mask": encoding['attention_mask'].flatten()
+            "question_bert": encoding['input_ids'].flatten(),
+            "question_bert_att_mask": encoding['attention_mask'].flatten()
         }
         # print(data)
         # a

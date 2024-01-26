@@ -18,23 +18,24 @@ def trainer(model, data_loader, optimizer, loss_function, epoch, device, schedul
     
     for i, batch in enumerate(metric_logger.log_every(data_loader, print_freq, header)):
         
-        # data = {
-        #     "image": image,
-        #     "question_rnn": question,
-        #     "answer": ann["answer_idx"],
-        #     "answer_type": ann['answer_type_idx'],
-        #     "question_id": ann['id'],
-        #     "question_text": ques["question_str"],
-        #     "input_ids": encoding['input_ids'].flatten(),
-        #     "attention_mask": encoding['attention_mask'].flatten()
-        # }
+        # "image": image,
+        # "question_rnn": question,
+        # "answer": ann["answer_idx"],
+        # "answer_type": ann['answer_type_idx'],
+        # "question_id": ann['id'],
+        # "question_text": ques["question_str"],
+        # "question_bert": encoding['input_ids'].flatten(),
+        # "question_bert_att_mask": encoding['attention_mask'].flatten()
+        
         images = batch["image"].to(device)
-        questions_rnn = batch["image"].to(device)
+        questions_rnn = batch["question_rnn"].to(device)
         answer_type = batch["answer_type"].to(device)
-        answers = batch["answers"].to(device)
-        question_bert = batch["answers"].to(device)
+        answers = batch["answer"].to(device)
+        
+        question_bert = batch["question_bert"].to(device)
+        question_bert = batch["question_bert_att_mask"].to(device)
+        
         qt_output, vqa_outputs = model(images, questions_rnn, question_bert)
-
         qt_loss, vqa_loss, total_loss = loss_function(qt_output, answer_type, vqa_outputs, answers)
         
         optimizer.zero_grad()
