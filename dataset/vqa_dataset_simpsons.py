@@ -168,6 +168,7 @@ class VQADataset(Dataset):
             "attention_mask": encoding['attention_mask'].flatten()
         }
         print(data)
+        a
         return image, question, ann["answer_idx"], ann['answer_type_idx'], ann['id']
     
     def __getitem__(self, index):
