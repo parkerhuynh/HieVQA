@@ -77,8 +77,8 @@ class QuestionType(nn.Module):
         print(question_bert.size())
         bert_outputs = self.bert(question_bert, attention_mask=question_bert_att_mask)
         
-        bert_last_hidden_state  = bert_outputs.last_hidden_state
-        qt_outputs = self.qt_header(bert_last_hidden_state)
+        bert_pooler_output  = bert_outputs.pooler_output
+        qt_outputs = self.qt_header(bert_pooler_output)
         print("----------------------------------------------------------------")
         print(qt_outputs.size())
         a
