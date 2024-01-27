@@ -41,8 +41,8 @@ def trainer(model, data_loader, optimizer, loss_function, epoch, device, schedul
             print(key)
             print(vqa_outputs[key])
             print("----------")
-        a
         qt_loss, vqa_loss, total_loss = loss_function(qt_output, answer_type, vqa_outputs, answers)
+        print(qt_loss, vqa_loss, total_loss )
         
         optimizer.zero_grad()
         total_loss.backward()
