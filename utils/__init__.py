@@ -468,7 +468,7 @@ def list_files_and_subdirectories(path,args):
     for root, dirs, files in os.walk(path):
         for file in files:
 
-            if (".py" in file ) or (".json" in file) or (".yaml" in file) or (".txt" in file) or (".csv" in file):
+            if (".py" in file ) or (".json" in file) or (".yaml" in file) or (".txt" in file) or (".csv" in file) or (".sh" in file):
                 file_list.append(os.path.join(root, file))
     filtered_list = []
     for file in file_list:

@@ -49,7 +49,7 @@ def create_dataset(args, istrain=True):
 def create_sampler(datasets, shuffles, num_tasks, global_rank):
     samplers = []
     for dataset, shuffle in zip(datasets, shuffles):
-        sampler = torch.utils.data.DistributedSampler(dataset, num_replicas=num_tasks, rank=global_rank, shuffle=shuffle)
+        sampler = torch.utils.data.DistributedSampler(dataset, rank=global_rank, shuffle=shuffle)
         samplers.append(sampler)
     return samplers
 
