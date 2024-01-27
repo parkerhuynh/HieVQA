@@ -107,7 +107,7 @@ def validator(model, data_loader, device, loss_function, args, epoch):
                 pred_vqa = vqa_result_qt[idx].item()
                 
                 pred_idx_to_answer = data_loader.dataset.ix_to_ans[pre_ques_type_str]
-                pred_vqa_str = pred_idx_to_answer[pred_vqa]
+                pred_vqa_str = pred_idx_to_answer[str(pred_vqa)]
                 
                 
                 results.append({"question_id":ques_id, 
