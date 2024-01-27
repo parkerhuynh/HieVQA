@@ -36,13 +36,21 @@ def trainer(model, data_loader, optimizer, loss_function, epoch, device, schedul
         question_bert_att_mask = batch["question_bert_att_mask"].to(device)
         
         qt_output, vqa_outputs = model(images, questions_rnn, question_bert, question_bert_att_mask)
-        print(qt_output)
-        for key in vqa_outputs:
-            print(key)
-            print(vqa_outputs[key])
-            print("----------")
+        
+        print("qt_output")
+        print(qt_output.size())
+        
+        print("answer_type")
+        print(answer_type.size())
+        
+        print("vqa_outputs")
+        print(vqa_outputs.size())
+        print("answers")
+        print(answers.size())
+        
         qt_loss, vqa_loss, total_loss = loss_function(qt_output, answer_type, vqa_outputs, answers)
-        print(qt_loss, vqa_loss, total_loss )
+        
+        
         
         optimizer.zero_grad()
         total_loss.backward()
