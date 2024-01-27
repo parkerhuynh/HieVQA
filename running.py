@@ -73,23 +73,6 @@ def main(args):
     if args.checkpoint != "":
         print("Not Implement")
         
-        # Create and evaluate the test dataset
-        # if is_main_process():
-        #     test_dataset = create_dataset(args, istrain=False)
-            
-        #     if args.distributed:
-        #         num_tasks = get_world_size()
-        #         global_rank = get_rank()
-        #         samplers = create_sampler(test_dataset, [False], num_tasks, global_rank)
-        #     else:
-        #         samplers = [None]
-        #     test_loader = create_loader(test_dataset, samplers, args, istrain =False)
-
-        #     # Fetch and set up the model according to specified configurations.
-        #     model  = torch.load(os.path.join(args.checkpoint))
-        #     model = model.to(device)
-        #     result = evaluator(model, test_loader, device)
-        #     result.to_csv(os.path.join("/".join(args.checkpoint.split("/")[:-1]), "result.csv"), index=False)
     else:
         # Create training and validation datasets
         print('> Creating training and validation sets'.upper())
