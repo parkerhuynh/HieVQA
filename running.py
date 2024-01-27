@@ -35,7 +35,7 @@ from PIL import Image
 import numpy as np
 import torch.onnx
 import glob
-
+from loss import HierarchicalLoss
 def main(args):
     print()
     init_distributed_mode(args)
