@@ -388,21 +388,6 @@ def load_configuration(model_name, dataset_name):
     training_config = yaml.safe_load(open(f'./configs/training.yaml'))
     return model_config, data_config, training_config
 
-def setup_environment(args):
-    """Setup the training environment including distributed mode, seeds, and device."""
-    init_distributed_mode(args)
-    device = torch.device(args.device)
-    world_size = get_world_size()  # Retrieve the world size for distributed training
-    set_random_seeds(42 + get_rank())
-    cudnn.benchmark = True
-    return device, world_size
-
-def set_random_seeds(seed):
-    """Set random seeds for reproducibility."""
-    torch.manual_seed(seed)
-    np.random.seed(seed)
-    random.seed(seed)
-
         
 def initialize_wandb(args):
     """Initialize Weights & Biases tracking."""
@@ -496,6 +481,12 @@ def list_files_and_subdirectories(path,args):
         else:
             filtered_list.append(file)
     return filtered_list
+
+def get_rank():
+    if not is_dist_avail_and_initialized():
+        return 0
+    return dist.get_rank()
+
 def write_json(result: list, wpath: str):
     with open(wpath, 'wt') as f:
         json.dump(result, f)
@@ -512,8 +503,7 @@ def read_json_lines(filepath):
     with open(filepath, 'rt') as f:
         for line in f:
             data.append(json.loads(line))
-    return data     
-
+    return data           
 def collect_result(result, filename, local_wdir, remove_duplicate=''):
     assert isinstance(result, list)
     write_json(result, os.path.join(local_wdir,
