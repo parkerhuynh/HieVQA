@@ -76,6 +76,8 @@ class QuestionType(nn.Module):
         bert_outputs = self.bert(question_bert, attention_mask=question_bert_att_mask)
         bert_last_hidden_state  = bert_outputs.last_hidden_state
         qt_outputs = self.qt_header(bert_last_hidden_state)
+        print("----------------------------------------------------------------")
+        print(qt_outputs.size())
         return qt_outputs
 
 class VQA_header(nn.Module):

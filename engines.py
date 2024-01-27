@@ -43,11 +43,6 @@ def trainer(model, data_loader, optimizer, loss_function, epoch, device, schedul
         print("answer_type")
         print(answer_type.size())
         
-        print("vqa_outputs")
-        print(vqa_outputs.size())
-        print("answers")
-        print(answers.size())
-        
         qt_loss, vqa_loss, total_loss = loss_function(qt_output, answer_type, vqa_outputs, answers)
         
         
