@@ -49,6 +49,8 @@ def main(args):
         args.batch_size_test = int(float(args.bs_test)/world_size)
         
     seed = args.seed + get_rank()
+    print("#"*100)
+    print(seed)
     torch.manual_seed(seed)
     np.random.seed(seed)
     random.seed(seed)
