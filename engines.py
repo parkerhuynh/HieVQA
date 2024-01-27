@@ -110,10 +110,10 @@ def validator(model, data_loader, device, loss_function, args, epoch):
                 
                 
                 results.append({"question_id":ques_id, 
-                                "qt_prediction": pre_ques_type_str,
-                                "qt_target":target_ques_type_str,
-                                "vqa_target":ans_str,
-                                "vqa_prediction": pred_vqa_str})
+                                "small_answer_type_prediction": pre_ques_type_str,
+                                "small_answer_type_target":target_ques_type_str,
+                                "target class":ans_str,
+                                "prediction class": pred_vqa_str})
                 
     metric_logger.synchronize_between_processes()
     print(f"Averaged stats: {metric_logger.global_avg()}")

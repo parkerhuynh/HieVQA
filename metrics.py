@@ -108,12 +108,12 @@ def calculate_vqa_accuracy(result_data):
 
 def calculate_accuracies(df, dataset):
     
-    df["small_answer_type_target"] = df["answer_type"].map(dataset.idx_to_ans_type)
-    df["small_answer_type_prediction"] = df["answer_type_prediction"].map(dataset.idx_to_ans_type)
+    # df["small_answer_type_target"] = df["answer_type"].map(dataset.idx_to_ans_type)
+    # df["small_answer_type_prediction"] = df["answer_type_prediction"].map(dataset.idx_to_ans_type)
     #########################################################################
     
-    df["target class"] = df[["small_answer_type_target", "target"]].apply(lambda x: convert_process(x["small_answer_type_target"], x["target"], dataset), axis =1)
-    df["prediction class"] = df[["small_answer_type_prediction", "prediction"]].apply(lambda x: convert_process(x["small_answer_type_prediction"], x["prediction"], dataset),  axis =1)
+    # df["target class"] = df[["small_answer_type_target", "target"]].apply(lambda x: convert_process(x["small_answer_type_target"], x["target"], dataset), axis =1)
+    # df["prediction class"] = df[["small_answer_type_prediction", "prediction"]].apply(lambda x: convert_process(x["small_answer_type_prediction"], x["prediction"], dataset),  axis =1)
     
     
     df["binary answerable prediction"] = df["prediction class"].apply(lambda x: "unanswerable" if x == "unanswerable" else "answerable")
