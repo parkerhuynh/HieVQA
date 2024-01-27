@@ -174,6 +174,7 @@ def main(args):
                     model_without_ddp = model.module
                 #Save model
                 print(val_accuracies)
+                wandb.log(val_accuracies)
                 last_model_path = os.path.join(args.output_dir, "model_latest_epoch.pt")
                 torch.save(model_without_ddp, last_model_path)
                 
