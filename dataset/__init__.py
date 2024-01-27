@@ -92,3 +92,4 @@ def create_loader(datasets, samplers, args, istrain=True):
             shuffle=False,
             drop_last=False,
         )
+        return train_loader, val_loader
