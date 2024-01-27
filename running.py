@@ -35,7 +35,7 @@ from PIL import Image
 import numpy as np
 import torch.onnx
 import glob
-from loss import HierarchicalLoss
+from loss import HierarchicalLoss  
 def main(args):
     print()
     init_distributed_mode(args)
@@ -73,6 +73,23 @@ def main(args):
     if args.checkpoint != "":
         print("Not Implement")
         
+        # Create and evaluate the test dataset
+        # if is_main_process():
+        #     test_dataset = create_dataset(args, istrain=False)
+            
+        #     if args.distributed:
+        #         num_tasks = get_world_size()
+        #         global_rank = get_rank()
+        #         samplers = create_sampler(test_dataset, [False], num_tasks, global_rank)
+        #     else:
+        #         samplers = [None]
+        #     test_loader = create_loader(test_dataset, samplers, args, istrain =False)
+
+        #     # Fetch and set up the model according to specified configurations.
+        #     model  = torch.load(os.path.join(args.checkpoint))
+        #     model = model.to(device)
+        #     result = evaluator(model, test_loader, device)
+        #     result.to_csv(os.path.join("/".join(args.checkpoint.split("/")[:-1]), "result.csv"), index=False)
     else:
         # Create training and validation datasets
         print('> Creating training and validation sets'.upper())
@@ -94,11 +111,11 @@ def main(args):
         args.optimizer['lr'] = float(args.optimizer['lr'])
         args.schedular['lr'] = float(args.schedular['lr'])
         model = get_model(args, train_dataset)
-        # if is_main_process() and args.wandb:
-        #     batch_example = next(iter(train_loader))
-        #     example_image = batch_example[0]
-        #     example_question = batch_example[1]
-        #     torch.onnx.export(model, (example_image, example_question), f"model_{args.code_version}.onnx")
+        if is_main_process() and args.wandb:
+            batch_example = next(iter(train_loader))
+            example_image = batch_example[0]
+            example_question = batch_example[1]
+            torch.onnx.export(model, (example_image, example_question), f"model_{args.code_version}.onnx")
         model = model.to(device)
         
         #OPTIMIZER and LOSS
@@ -130,7 +147,7 @@ def main(args):
             if args.distributed:
                 train_loader.sampler.set_epoch(epoch)
             train_stats = trainer(model, train_loader, optimizer, loss_fn, epoch, device, lr_scheduler, args, wandb)
-
+            
             validation_stats, val_prediction = validator(model, val_loader, device, loss_fn, args, epoch)
             combine_result = collect_result(val_prediction, f'vqa_result_{args.model}_{args.task}_{args.dataset}_epoch{epoch}', local_wdir="./temp_result")
             if args.wandb:
@@ -325,4 +342,3 @@ if __name__ == '__main__':
     for file_path in files_to_remove:
         if os.path.isfile(file_path):  # Check if it's a file
             os.remove(file_path)
-    

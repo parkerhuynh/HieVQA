@@ -76,7 +76,7 @@ def create_loader(datasets, samplers, args, istrain=True):
         train_loader = DataLoader(
             train_dataset,
             batch_size=args.batch_size_train,
-            num_workers=2,
+            num_workers=4,
             pin_memory=True,
             sampler=train_samples,
             shuffle=train_shuffle,
@@ -86,10 +86,9 @@ def create_loader(datasets, samplers, args, istrain=True):
         val_loader = DataLoader(
             val_dataset,
             batch_size=args.batch_size_test,
-            num_workers=2,
+            num_workers=4,
             pin_memory=True,
             sampler=val_samples,
             shuffle=False,
             drop_last=False,
         )
-        return train_loader, val_loader
