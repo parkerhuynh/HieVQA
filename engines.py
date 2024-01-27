@@ -38,7 +38,7 @@ def trainer(model, data_loader, optimizer, loss_function, epoch, device, schedul
         qt_output, vqa_outputs = model(images, questions_rnn, question_bert, question_bert_att_mask)        
         qt_loss, vqa_loss, total_loss = loss_function(qt_output, question_type, vqa_outputs, answers)
         
-        print(qt_loss, total_loss)
+        # print(qt_loss, total_loss)
         
         optimizer.zero_grad()
         total_loss.backward()
@@ -90,12 +90,14 @@ def validator(model, data_loader, device, loss_function, args, epoch):
             metric_logger.update(qt_loss=qt_loss)
             metric_logger.update(total_loss=total_loss)
             _, qt_predictions  = torch.max(qt_output, 1)
+            qt_predictions = qt_predictions.cpu().tolist()
+            question_type = question_type.cpu().tolist()
+            
             for idx, (ques_id, qt_pred, qt_target) in enumerate(zip(question_id, qt_predictions, question_type)):
                 ques_id = int(ques_id)
-                print(idx)
                 results.append({"question_id":ques_id, 
-                                "prediction":data_loader.dataset.ix_to_ans[str(qt_pred)],
-                                "target":data_loader.dataset.ix_to_ans[str(qt_target)]})
+                                "prediction":data_loader.dataset.idx_to_ans_type[str(qt_pred)],
+                                "target":data_loader.dataset.idx_to_ans_type[str(qt_target)]})
             print(results)
             a
                 

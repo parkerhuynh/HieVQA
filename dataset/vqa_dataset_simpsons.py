@@ -131,6 +131,8 @@ class VQADataset(Dataset):
         
     
     def __len__(self):
+        if self.split == "train":
+            return 500
         return len(self.annotations)
     
     
