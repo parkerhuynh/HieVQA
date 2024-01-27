@@ -81,7 +81,7 @@ def validator(model, data_loader, device, loss_function, args, epoch):
             question_bert_att_mask = batch["question_bert_att_mask"].to(device)
             question_id = batch["question_id"]
             question_type_str = batch["question_type_str"]
-            vqa_answer_str = batch["question_type_str"]
+            vqa_answer_str = batch["answer_str"]
             
             
             qt_output, vqa_outputs = model(images, questions_rnn, question_bert, question_bert_att_mask)
@@ -93,7 +93,6 @@ def validator(model, data_loader, device, loss_function, args, epoch):
             metric_logger.update(total_loss=total_loss)
             _, qt_predictions  = torch.max(qt_output, 1)
             qt_predictions = qt_predictions.cpu().tolist()
-            vqa_answers = answers.cpu().tolist()
             
             for idx, (ques_id, qt_pred, qt_target, ans_str) in enumerate(zip(question_id, qt_predictions, question_type_str, vqa_answer_str)):
                 ques_id = int(ques_id)
@@ -116,8 +115,11 @@ def validator(model, data_loader, device, loss_function, args, epoch):
                                 "vqa_target":ans_str,
                                 "vqa_prediction": pred_vqa_str})
                 
-            print(results)
-            a
+    metric_logger.synchronize_between_processes()
+    print(f"Averaged stats: {metric_logger.global_avg()}")
+    stat = {k: meter.global_avg for k, meter in metric_logger.meters.items()}
+    return stat, results
+
                 
             
 

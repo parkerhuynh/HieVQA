@@ -496,3 +496,51 @@ def list_files_and_subdirectories(path,args):
         else:
             filtered_list.append(file)
     return filtered_list
+def write_json(result: list, wpath: str):
+    with open(wpath, 'wt') as f:
+        json.dump(result, f)
+
+def is_main_process():
+    return get_rank() == 0
+
+def get_world_size():
+    if not is_dist_avail_and_initialized():
+        return 1
+    return dist.get_world_size()
+def read_json_lines(filepath):
+    data = []
+    with open(filepath, 'rt') as f:
+        for line in f:
+            data.append(json.loads(line))
+    return data     
+
+def collect_result(result, filename, local_wdir, remove_duplicate=''):
+    assert isinstance(result, list)
+    write_json(result, os.path.join(local_wdir,
+                                    '%s_rank%d.json' % (filename, get_rank())))
+    dist.barrier()
+
+
+    result = []
+    final_result_file = ''
+    if is_main_process():
+        # combine results from all processes
+        for rank in range(get_world_size()):
+            file_path = os.path.join(local_wdir, '%s_rank%d.json' % (filename, rank))
+            result.extend(read_json_lines(file_path)[0])
+
+        result_new = []
+        id_list = set()
+        for res in result:
+            if res["question_id"] not in id_list:
+                id_list.add(res["question_id"])
+                result_new.append(res)
+        result = result_new
+        print(len(result))
+        final_result_file = os.path.join(local_wdir, '%s.json' % filename)
+        json.dump(result, open(final_result_file, 'w'), indent=4)
+        print('result file saved to %s' % final_result_file)
+
+    dist.barrier()
+
+    return result

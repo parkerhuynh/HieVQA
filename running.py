@@ -140,7 +140,8 @@ def main(args):
                 train_loader.sampler.set_epoch(epoch)
             train_stats = trainer(model, train_loader, optimizer, loss_fn, epoch, device, lr_scheduler, args, wandb)
             
-            validation_stats, val_accuraciess, val_prediction_csv_i = validator(model, val_loader, device, loss_fn, args, epoch)
+            validation_stats, val_prediction = validator(model, val_loader, device, loss_fn, args, epoch)
+            combine_result = collect_result(val_prediction, f'vqa_result_{args.model}_{args.task}_{args.dataset}_epoch{epoch}', local_wdir="./temp_result")
 
             if args.wandb:
                 wandb_train_log = {**{f'train_{k}': float(v) for k, v in train_stats.items()},
@@ -154,6 +155,10 @@ def main(args):
                 if hasattr(model, 'module'):
                     model_without_ddp = model.module
                 #Save model
+                
+                combine_result_csv = pd.DataFrame(combine_result)
+                val_accuracies, val_prediction_csv_i = calculate_accuracies(combine_result_csv, val_dataset)
+                
                 val_prediction_csv = val_prediction_csv_i
                 last_model_path = os.path.join(args.output_dir, "model_latest_epoch.pt")
                 torch.save(model_without_ddp, last_model_path)
