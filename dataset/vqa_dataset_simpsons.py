@@ -29,14 +29,9 @@ class VQADataset(Dataset):
         self.super_types = self.load_json_file('/home/ndhuynh/github/HieVQA/dataset/super_answer_type_simpsons.json')
         self.ans_to_ix, self.ix_to_ans = self.prepare_answer_vocab()
         self.ans_size = len(self.ans_to_ix)
-        self.ans_type_to_idx = {}
-        self.idx_to_ans_type = {}
+        self.ans_type_to_idx = {'yes/no': 0, 'action': 1, 'object': 2, 'location': 3, 'other': 4, 'color': 5, 'human': 6, 'number': 7}
+        self.idx_to_ans_type = {0: 'yes/no', 1: 'action', 2: 'object', 3: 'location', 4: 'other', 5: 'color', 6: 'human', 7: 'number'}
         self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-        
-        for i, ans_type in enumerate(self.ans_to_ix.keys()):
-            self.ans_type_to_idx[ans_type] = i
-            self.idx_to_ans_type[i] = ans_type
-            
         self.questions = self.load_questions()
         self.annotations, self.idx_to_ann  = self.load_annotations() if split != 'test' else ([], [])
         
@@ -161,7 +156,7 @@ class VQADataset(Dataset):
             "image": image,
             "question_rnn": question,
             "answer": ann["answer_idx"],
-            "answer_type": ann['answer_type_idx'],
+            "question_type": ann['answer_type_idx'],
             "question_id": ann['id'],
             "question_text": ques["question_str"],
             "question_bert": encoding['input_ids'].flatten(),
