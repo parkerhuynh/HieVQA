@@ -73,15 +73,10 @@ class QuestionType(nn.Module):
         outputs (Tensor): The predicted class probabilities for each question type.
         qt_loss : Cross-Entropy loss, returned only in training mode.
         """
-        print("----------------------------------------------------------------")
-        print(question_bert.size())
         bert_outputs = self.bert(question_bert, attention_mask=question_bert_att_mask)
-        
         bert_pooler_output  = bert_outputs.pooler_output
         qt_outputs = self.qt_header(bert_pooler_output)
-        print("----------------------------------------------------------------")
-        print(qt_outputs.size())
-        a
+
         return qt_outputs
 
 class VQA_header(nn.Module):
