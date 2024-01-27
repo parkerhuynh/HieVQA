@@ -199,9 +199,9 @@ def annotation_preprocessing( anns):
             ann["original_answer"] = ann["answer"]
             ann["processed_answer_type"] = ann["answer_type"]
             proccesed_anns.append(ann)
-        elif ann["overall_scores"]["question"] < 0.5:
-            ann["original_answer"] = ann["answer"]
-            ann["answer"] = "unanswerable"
-            ann["processed_answer_type"] = "unanswerable"
-            proccesed_anns.append(ann)
+        # elif ann["overall_scores"]["question"] < 0.5:
+        #     ann["original_answer"] = ann["answer"]
+        #     ann["answer"] = "unanswerable"
+        #     ann["processed_answer_type"] = "unanswerable"
+        #     proccesed_anns.append(ann)
     return proccesed_anns
