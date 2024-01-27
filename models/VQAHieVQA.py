@@ -133,6 +133,6 @@ class VQAHieVQA(nn.Module):
         question_rnn = self.question_encoder(question_rnn)
         combine_features = image*question_rnn
         
-        question_type_output = self.question_type_mlp(question_bert, attention_mask=question_bert_att_mask)
+        question_type_output = self.question_type_mlp(question_bert, question_bert_att_mask)
         vqa_outputs =  self.vqa_mlp(combine_features)
         return question_type_output, vqa_outputs
