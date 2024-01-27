@@ -33,9 +33,9 @@ def trainer(model, data_loader, optimizer, loss_function, epoch, device, schedul
         answers = batch["answer"].to(device)
         
         question_bert = batch["question_bert"].to(device)
-        question_bert = batch["question_bert_att_mask"].to(device)
+        question_bert_att_mask = batch["question_bert_att_mask"].to(device)
         
-        qt_output, vqa_outputs = model(images, questions_rnn, question_bert)
+        qt_output, vqa_outputs = model(images, questions_rnn, question_bert, question_bert_att_mask)
         qt_loss, vqa_loss, total_loss = loss_function(qt_output, answer_type, vqa_outputs, answers)
         
         optimizer.zero_grad()

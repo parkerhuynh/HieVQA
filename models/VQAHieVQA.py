@@ -124,12 +124,14 @@ class VQAHieVQA(nn.Module):
         if self.args.debug_print:
             print(message)
 
-    def forward(self, image, question_rnn, question_bert):
+    def forward(self, image, question_rnn, question_bert, question_bert_att_mask):
         image = self.image_encoder(image)
         question_rnn = self.word_embeddings(question_rnn)
         question_rnn = self.question_encoder(question_rnn)
         combine_features = image*question_rnn
         
-        question_type_output = self.question_type_mlp(question_bert)
+        question_type_output = self.question_type_mlp(question_bert, attention_mask=question_bert_att_mask, labels=labels)
         vqa_outputs =  self.vqa_mlp(combine_features)
+        
+        
         return question_type_output, vqa_outputs
