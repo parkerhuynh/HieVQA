@@ -38,7 +38,7 @@ def create_dataset(args, istrain=True):
 
     if args.checkpoint == "":
         train_dataset = vqa_dataset(args, train_transform_wohflip, split='train')
-        val_dataset = vqa_dataset(args, train_transform_wohflip, split='val')
+        val_dataset = vqa_dataset(args, test_transform, split='val')
         
         return train_dataset, val_dataset
     else:
