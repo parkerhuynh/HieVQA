@@ -111,11 +111,11 @@ def main(args):
         args.optimizer['lr'] = float(args.optimizer['lr'])
         args.schedular['lr'] = float(args.schedular['lr'])
         model = get_model(args, train_dataset)
-        if is_main_process() and args.wandb:
-            batch_example = next(iter(train_loader))
-            example_image = batch_example[0]
-            example_question = batch_example[1]
-            torch.onnx.export(model, (example_image, example_question), f"model_{args.code_version}.onnx")
+        # if is_main_process() and args.wandb:
+        #     batch_example = next(iter(train_loader))
+        #     example_image = batch_example[0]
+        #     example_question = batch_example[1]
+        #     torch.onnx.export(model, (example_image, example_question), f"model_{args.code_version}.onnx")
         model = model.to(device)
         
         #OPTIMIZER and LOSS
