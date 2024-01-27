@@ -80,6 +80,8 @@ def validator(model, data_loader, device, loss_function, args, epoch):
             question_bert = batch["question_bert"].to(device)
             question_bert_att_mask = batch["question_bert_att_mask"].to(device)
             question_id = batch["question_id"]
+            question_type_str = batch["question_type_str"]
+            vqa_answer_str = batch["question_type_str"]
             
             
             qt_output, vqa_outputs = model(images, questions_rnn, question_bert, question_bert_att_mask)
@@ -91,14 +93,29 @@ def validator(model, data_loader, device, loss_function, args, epoch):
             metric_logger.update(total_loss=total_loss)
             _, qt_predictions  = torch.max(qt_output, 1)
             qt_predictions = qt_predictions.cpu().tolist()
-            question_type = question_type.cpu().tolist()
+            vqa_answers = answers.cpu().tolist()
             
-            for idx, (ques_id, qt_pred, qt_target) in enumerate(zip(question_id, qt_predictions, question_type)):
+            for idx, (ques_id, qt_pred, qt_target, ans_str) in enumerate(zip(question_id, qt_predictions, question_type_str, vqa_answer_str)):
                 ques_id = int(ques_id)
-                print(idx)
+                pre_ques_type_str = data_loader.dataset.idx_to_ans_type[qt_pred]
+                target_ques_type_str = qt_target
+                
+                
+                
+                vqa_result_qt = vqa_outputs[pre_ques_type_str]
+                _, vqa_result_qt  = torch.max(vqa_result_qt, 1)
+                pred_vqa = vqa_result_qt[i].item()
+                
+                pred_idx_to_answer = data_loader.dataset.ix_to_ans[pre_ques_type_str]
+                pred_vqa_str = pred_idx_to_answer[pred_vqa]
+                
+                
                 results.append({"question_id":ques_id, 
-                                "qt_prediction":data_loader.dataset.idx_to_ans_type[qt_pred],
-                                "qt_target":data_loader.dataset.idx_to_ans_type[qt_target]})
+                                "qt_prediction": pre_ques_type_str,
+                                "qt_target":target_ques_type_str,
+                                "vqa_target":ans_str,
+                                "vqa_prediction": pred_vqa_str})
+                
             print(results)
             a
                 

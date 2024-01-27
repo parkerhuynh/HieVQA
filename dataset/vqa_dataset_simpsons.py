@@ -95,7 +95,7 @@ class VQADataset(Dataset):
             
             at_idx = self.ans_type_to_idx[at_str]
             ans_idx = ans_to_idx_dict[ans_str]
-            
+            ann["answer_type_str"] = at_str
             ann["answer_type_idx"] = at_idx
             ann["answer_idx"] = ans_idx
             processed_ann.append(ann)
@@ -132,7 +132,7 @@ class VQADataset(Dataset):
     
     def __len__(self):
         if self.split == "train":
-            return 500
+            return 128
         return len(self.annotations)
     
     
@@ -158,7 +158,9 @@ class VQADataset(Dataset):
             "image": image,
             "question_rnn": question,
             "answer": ann["answer_idx"],
+            "answer_str": ann["answer"],
             "question_type": ann['answer_type_idx'],
+            "question_type_str": ann['answer_type_str'],
             "question_id": ann['id'],
             "question_text": ques["question_str"],
             "question_bert": encoding['input_ids'].flatten(),
