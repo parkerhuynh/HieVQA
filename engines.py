@@ -96,8 +96,8 @@ def validator(model, data_loader, device, loss_function, args, epoch):
             for idx, (ques_id, qt_pred, qt_target) in enumerate(zip(question_id, qt_predictions, question_type)):
                 ques_id = int(ques_id)
                 results.append({"question_id":ques_id, 
-                                "prediction":data_loader.dataset.idx_to_ans_type[str(qt_pred)],
-                                "target":data_loader.dataset.idx_to_ans_type[str(qt_target)]})
+                                "prediction":data_loader.dataset.idx_to_ans_type[qt_pred],
+                                "target":data_loader.dataset.idx_to_ans_type[qt_target]})
             print(results)
             a
                 
