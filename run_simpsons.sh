@@ -15,7 +15,7 @@ task=hie-vqa-wo-unans-9types # vqa-w-ans & vqa-hie
 note="Hie-VQA-Wo-Unans-9types"
 version="v2"
 bs=128
-bs_test=8
+bs_test=128
 
 
 # Print system information
