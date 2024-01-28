@@ -122,7 +122,7 @@ def main(args):
         
         #OPTIMIZER and LOSS
         arg_opt = AttrDict(args.optimizer)
-        optimizer = AdamW(model.parameters(), lr=1e-5)
+        optimizer = AdamW(model.parameters(), lr=2e-5)
         loss_fn =  HierarchicalLoss(args, train_dataset)
 
         # lr_scheduler = None

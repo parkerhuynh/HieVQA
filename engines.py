@@ -29,22 +29,18 @@ def trainer(model, data_loader, optimizer, loss_function, epoch, device, args, w
         qt_output, vqa_outputs = model(images, questions_rnn, question_bert, question_bert_att_mask)
         # qt_output = model(question_bert, question_bert_att_mask)
         qt_loss, vqa_losses = loss_function(qt_output, question_type, vqa_outputs, answers)
-        total_loss = F.cross_entropy(qt_output, question_type)
         
         optimizer.zero_grad()
         qt_loss.backward(retain_graph=True)
-        print(vqa_losses)
-        for vqa_based_qt in vqa_losses:
-            print(vqa_losses[vqa_based_qt])
-            vqa_losses[vqa_based_qt].backward(retain_graph=True)
-        
-        
-        
-        optimizer.step()
 
-        
+        for vqa_based_qt in vqa_losses:
+            vqa_losses[vqa_based_qt].backward(retain_graph=True)
+        optimizer.step()
         if args.wandb:
             wandb.log({"train_vqa_loss_iter": qt_loss.item()})
+            
+        vqa_loss = sum(vqa_losses.values())
+        total_loss = qt_loss+vqa_loss
         metric_logger.update(vqa_loss=vqa_loss)
         metric_logger.update(qt_loss=qt_loss)
         metric_logger.update(total_loss=total_loss)
@@ -85,7 +81,7 @@ def validator(model, data_loader, device, loss_function, args, epoch):
             
             
             qt_output, vqa_outputs = model(images, questions_rnn, question_bert, question_bert_att_mask)
-            qt_loss, vqa_loss, total_loss = loss_function(qt_output, question_type, vqa_outputs, answers)
+            qt_loss, vqa_loss = loss_function(qt_output, question_type, vqa_outputs, answers)
             # qt_output = model(question_bert, question_bert_att_mask)
             # qt_loss = F.cross_entropy(qt_output, question_type)
             
