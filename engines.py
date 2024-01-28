@@ -10,9 +10,9 @@ import torch.nn.functional as F
 def trainer(model, data_loader, optimizer, loss_function, epoch, device, args, wandb):
     model.train()
     metric_logger = MetricLogger(delimiter="  ")
-    # metric_logger.add_meter('vqa_loss', SmoothedValue(window_size=1, fmt='{value:.6f}'))
+    metric_logger.add_meter('vqa_loss', SmoothedValue(window_size=1, fmt='{value:.6f}'))
     metric_logger.add_meter('qt_loss', SmoothedValue(window_size=1, fmt='{value:.6f}'))
-    # metric_logger.add_meter('total_loss', SmoothedValue(window_size=1, fmt='{value:.6f}'))
+    metric_logger.add_meter('total_loss', SmoothedValue(window_size=1, fmt='{value:.6f}'))
     header = f'Train Epoch: [{epoch}]'
     print_freq = args.print_freq
     
@@ -26,13 +26,10 @@ def trainer(model, data_loader, optimizer, loss_function, epoch, device, args, w
         question_bert = batch["question_bert"].to(device)
         question_bert_att_mask = batch["question_bert_att_mask"].to(device)
         
-        # qt_output, vqa_outputs = model(images, questions_rnn, question_bert, question_bert_att_mask)
-        qt_output = model(question_bert, question_bert_att_mask)      
-        # qt_loss, vqa_loss, total_loss = loss_function(qt_output, question_type, vqa_outputs, answers)
+        qt_output, vqa_outputs = model(images, questions_rnn, question_bert, question_bert_att_mask)
+        # qt_output = model(question_bert, question_bert_att_mask)
+        qt_loss, vqa_loss, total_loss = loss_function(qt_output, question_type, vqa_outputs, answers)
         qt_loss = F.cross_entropy(qt_output, question_type)
-        # print(qt_output)
-        # print(question_type)
-        # print(qt_loss, total_loss)
         
         optimizer.zero_grad()
         qt_loss.backward()
@@ -41,9 +38,9 @@ def trainer(model, data_loader, optimizer, loss_function, epoch, device, args, w
         
         if args.wandb:
             wandb.log({"train_vqa_loss_iter": qt_loss.item()})
-        # metric_logger.update(vqa_loss=vqa_loss)
+        metric_logger.update(vqa_loss=vqa_loss)
         metric_logger.update(qt_loss=qt_loss)
-        # metric_logger.update(total_loss=total_loss)
+        metric_logger.update(total_loss=total_loss)
         metric_logger.update(lr=optimizer.param_groups[0]["lr"])
     metric_logger.synchronize_between_processes()
     print("Averaged stats:", metric_logger.global_avg())
@@ -58,9 +55,9 @@ def validator(model, data_loader, device, loss_function, args, epoch):
     model.eval()
     print_freq = args.print_freq
     metric_logger = MetricLogger(delimiter="  ")
-    # metric_logger.add_meter('vqa_loss', SmoothedValue(window_size=1, fmt='{value:.6f}'))
+    metric_logger.add_meter('vqa_loss', SmoothedValue(window_size=1, fmt='{value:.6f}'))
     metric_logger.add_meter('qt_loss', SmoothedValue(window_size=1, fmt='{value:.6f}'))
-    # metric_logger.add_meter('total_loss', SmoothedValue(window_size=1, fmt='{value:.6f}'))
+    metric_logger.add_meter('total_loss', SmoothedValue(window_size=1, fmt='{value:.6f}'))
     
     
     
@@ -80,14 +77,14 @@ def validator(model, data_loader, device, loss_function, args, epoch):
             vqa_answer_str = batch["answer_str"]
             
             
-            # qt_output, vqa_outputs = model(images, questions_rnn, question_bert, question_bert_att_mask)
-            # qt_loss, vqa_loss, total_loss = loss_function(qt_output, question_type, vqa_outputs, answers)
-            qt_output = model(question_bert, question_bert_att_mask)
-            qt_loss = F.cross_entropy(qt_output, question_type)
+            qt_output, vqa_outputs = model(images, questions_rnn, question_bert, question_bert_att_mask)
+            qt_loss, vqa_loss, total_loss = loss_function(qt_output, question_type, vqa_outputs, answers)
+            # qt_output = model(question_bert, question_bert_att_mask)
+            # qt_loss = F.cross_entropy(qt_output, question_type)
             
-            # metric_logger.update(vqa_loss=vqa_loss.item())
+            metric_logger.update(vqa_loss=vqa_loss.item())
             metric_logger.update(qt_loss=qt_loss)
-            # metric_logger.update(total_loss=total_loss)
+            metric_logger.update(total_loss=total_loss)
             # _, qt_predictions  = torch.max(qt_output, 1)
             # qt_predictions = qt_predictions.cpu().tolist()
             

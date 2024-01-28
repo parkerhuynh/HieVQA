@@ -101,23 +101,22 @@ class VQAHieVQA(nn.Module):
     def __init__(self, args, question_vocab_size, ans_vocab_type_dict, idx_to_answer_type):
         super(VQAHieVQA, self).__init__()
         self.args = args
-        # self.image_encoder = ImageEncoder(image_feature_output=args.model_config["image_feature_output"])
+        self.image_encoder = ImageEncoder(image_feature_output=args.model_config["image_feature_output"])
 
-        # self.word_embeddings = nn.Embedding(question_vocab_size, args.model_config["word_embedding"])
-        # self.question_encoder = QuestionEmbedding(
-        #     word_embedding_size=args.model_config["word_embedding"],
-        #     hidden_size=args.model_config["rnn_hidden_size"])
+        self.word_embeddings = nn.Embedding(question_vocab_size, args.model_config["word_embedding"])
+        self.question_encoder = QuestionEmbedding(
+            word_embedding_size=args.model_config["word_embedding"],
+            hidden_size=args.model_config["rnn_hidden_size"])
         
-        # self.vqa_mlp = VQA_header(ans_vocab_type_dict)
+        self.vqa_mlp = VQA_header(ans_vocab_type_dict)
         self.question_type_mlp = QuestionType(idx_to_answer_type)
             
-    def forward(self, question_bert, question_bert_att_mask):
-    # def forward(self, image, question_rnn, question_bert, question_bert_att_mask):
-        # image = self.image_encoder(image)
-        # question_rnn = self.word_embeddings(question_rnn)
-        # question_rnn = self.question_encoder(question_rnn)
-        # combine_features = image*question_rnn
+    def forward(self, image, question_rnn, question_bert, question_bert_att_mask):
+        image = self.image_encoder(image)
+        question_rnn = self.word_embeddings(question_rnn)
+        question_rnn = self.question_encoder(question_rnn)
+        combine_features = image*question_rnn
         
         question_type_output = self.question_type_mlp(question_bert, question_bert_att_mask)
-        # vqa_outputs =  self.vqa_mlp(combine_features)
-        return question_type_output
+        vqa_outputs =  self.vqa_mlp(combine_features)
+        return question_type_output, vqa_outputs
