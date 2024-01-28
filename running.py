@@ -20,7 +20,7 @@ from torch import nn
 import pandas as pd
 import wandb
 from datetime import datetime
-
+from transformers import AdamW
 from engines import trainer, validator
 import warnings
 import torch.distributed as dist
@@ -122,10 +122,7 @@ def main(args):
         
         #OPTIMIZER and LOSS
         arg_opt = AttrDict(args.optimizer)
-        optimizer = create_optimizer(arg_opt, model)
-        arg_sche = AttrDict(args.schedular)
-        arg_sche['step_per_epoch'] = math.ceil(train_dataset_size / (args.batch_size_train * world_size))
-        lr_scheduler = create_scheduler(arg_sche, optimizer)
+        optimizer = AdamW(model.parameters(), lr=2e-5)
         loss_fn =  HierarchicalLoss(args, train_dataset)
 
         # lr_scheduler = None
@@ -149,7 +146,7 @@ def main(args):
             print("\n\n" + "--"*50 + f" Epoch {epoch} " + "--"*50 + "\n")
             if args.distributed:
                 train_loader.sampler.set_epoch(epoch)
-            train_stats = trainer(model, train_loader, optimizer, loss_fn, epoch, device, lr_scheduler, args, wandb)
+            train_stats = trainer(model, train_loader, optimizer, loss_fn, epoch, device, args, wandb)
             
             validation_stats, val_prediction = validator(model, val_loader, device, loss_fn, args, epoch)
             # combine_result = collect_result(val_prediction, f'vqa_result_{args.model}_{args.task}_{args.dataset}_epoch{epoch}', local_wdir="./temp_result")

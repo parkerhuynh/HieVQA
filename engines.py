@@ -7,7 +7,7 @@ from torch import nn
 import torch.distributed as dist
 import torch.nn.functional as F
 
-def trainer(model, data_loader, optimizer, loss_function, epoch, device, scheduler, args, wandb):
+def trainer(model, data_loader, optimizer, loss_function, epoch, device, args, wandb):
     model.train()
     metric_logger = MetricLogger(delimiter="  ")
     # metric_logger.add_meter('vqa_loss', SmoothedValue(window_size=1, fmt='{value:.6f}'))
@@ -37,7 +37,7 @@ def trainer(model, data_loader, optimizer, loss_function, epoch, device, schedul
         optimizer.zero_grad()
         qt_loss.backward()
         optimizer.step()
-        scheduler.step()
+
         
         if args.wandb:
             wandb.log({"train_vqa_loss_iter": qt_loss.item()})
