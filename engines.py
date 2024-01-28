@@ -81,10 +81,11 @@ def validator(model, data_loader, device, loss_function, args, epoch):
             
             
             qt_output, vqa_outputs = model(images, questions_rnn, question_bert, question_bert_att_mask)
-            qt_loss, vqa_loss = loss_function(qt_output, question_type, vqa_outputs, answers)
+            qt_loss, vqa_losses = loss_function(qt_output, question_type, vqa_outputs, answers)
             # qt_output = model(question_bert, question_bert_att_mask)
             # qt_loss = F.cross_entropy(qt_output, question_type)
-            
+            vqa_loss = sum(vqa_losses.values())
+            total_loss = qt_loss+vqa_loss
             metric_logger.update(vqa_loss=vqa_loss.item())
             metric_logger.update(qt_loss=qt_loss)
             metric_logger.update(total_loss=total_loss)
