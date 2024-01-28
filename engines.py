@@ -10,12 +10,12 @@ import torch.nn.functional as F
 def trainer(model, data_loader, optimizer, loss_function, epoch, device, scheduler, args, wandb):
     model.train()
     metric_logger = MetricLogger(delimiter="  ")
-    metric_logger.add_meter('vqa_loss', SmoothedValue(window_size=1, fmt='{value:.6f}'))
+    # metric_logger.add_meter('vqa_loss', SmoothedValue(window_size=1, fmt='{value:.6f}'))
     metric_logger.add_meter('qt_loss', SmoothedValue(window_size=1, fmt='{value:.6f}'))
-    metric_logger.add_meter('total_loss', SmoothedValue(window_size=1, fmt='{value:.6f}'))
+    # metric_logger.add_meter('total_loss', SmoothedValue(window_size=1, fmt='{value:.6f}'))
     header = f'Train Epoch: [{epoch}]'
     print_freq = args.print_freq
-    print(data_loader.dataset[1])
+    
     for i, batch in enumerate(metric_logger.log_every(data_loader, print_freq, header)):
         
         images = batch["image"].to(device)
