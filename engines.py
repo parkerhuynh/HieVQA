@@ -32,7 +32,7 @@ def trainer(model, data_loader, optimizer, loss_function, epoch, device, args, w
         total_loss = F.cross_entropy(qt_output, question_type)
         
         optimizer.zero_grad()
-        qt_loss.backward()
+        qt_loss.backward(retain_graph=True)
         print(vqa_losses)
         for vqa_based_qt in vqa_losses:
             print(vqa_losses[vqa_based_qt])
