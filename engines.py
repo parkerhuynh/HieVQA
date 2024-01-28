@@ -86,26 +86,26 @@ def validator(model, data_loader, device, loss_function, args, epoch):
             _, qt_predictions  = torch.max(qt_output, 1)
             qt_predictions = qt_predictions.cpu().tolist()
             
-            # for idx, (ques_id, qt_pred, qt_target, ans_str) in enumerate(zip(question_id, qt_predictions, question_type_str, vqa_answer_str)):
-            #     ques_id = int(ques_id)
-            #     pre_ques_type_str = data_loader.dataset.idx_to_ans_type[qt_pred]
-            #     target_ques_type_str = qt_target
+            for idx, (ques_id, qt_pred, qt_target, ans_str) in enumerate(zip(question_id, qt_predictions, question_type_str, vqa_answer_str)):
+                ques_id = int(ques_id)
+                pre_ques_type_str = data_loader.dataset.idx_to_ans_type[qt_pred]
+                target_ques_type_str = qt_target
                 
                 
                 
-            #     vqa_result_qt = vqa_outputs[pre_ques_type_str]
-            #     _, vqa_result_qt  = torch.max(vqa_result_qt, 1)
-            #     pred_vqa = vqa_result_qt[idx].item()
+                vqa_result_qt = vqa_outputs[pre_ques_type_str]
+                _, vqa_result_qt  = torch.max(vqa_result_qt, 1)
+                pred_vqa = vqa_result_qt[idx].item()
                 
-            #     pred_idx_to_answer = data_loader.dataset.ix_to_ans[pre_ques_type_str]
-            #     pred_vqa_str = pred_idx_to_answer[str(pred_vqa)]
+                pred_idx_to_answer = data_loader.dataset.ix_to_ans[pre_ques_type_str]
+                pred_vqa_str = pred_idx_to_answer[str(pred_vqa)]
                 
                 
-            #     results.append({"question_id":ques_id, 
-            #                     "small_answer_type_prediction": pre_ques_type_str,
-            #                     "small_answer_type_target":target_ques_type_str,
-            #                     "target class":ans_str,
-            #                     "prediction class": pred_vqa_str})
+                results.append({"question_id":ques_id, 
+                                "small_answer_type_prediction": pre_ques_type_str,
+                                "small_answer_type_target":target_ques_type_str,
+                                "target class":ans_str,
+                                "prediction class": pred_vqa_str})
                 
     metric_logger.synchronize_between_processes()
     print(f"Averaged stats: {metric_logger.global_avg()}")
