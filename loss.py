@@ -33,6 +33,6 @@ class HierarchicalLoss(nn.Module):
             vqa_loss_i = vqa_loss_i.mean()
             vqa_losses[question_type_str] = vqa_loss_i
         # total_vqa_loss = sum(vqa_losses.values())
-        total_loss = qt_loss + total_vqa_loss
+        # total_loss = qt_loss + total_vqa_loss
         # return qt_loss, total_vqa_loss, total_loss
         return qt_loss, vqa_losses
