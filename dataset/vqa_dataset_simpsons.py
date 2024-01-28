@@ -170,7 +170,11 @@ class VQADataset(Dataset):
         # print(data)
         # a
         # return image, question, ann["answer_idx"], ann['answer_type_idx'], ann['id']
+        print(data)
+        print(ann)
+        print("-----------------------")
         return data
+
     
     def __getitem__(self, index):
         
