@@ -29,8 +29,24 @@ class VQADataset(Dataset):
         self.super_types = self.load_json_file('/home/ndhuynh/github/HieVQA/dataset/super_answer_type_simpsons.json')
         self.ans_to_ix, self.ix_to_ans = self.prepare_answer_vocab()
         self.ans_size = len(self.ans_to_ix)
-        self.ans_type_to_idx = {'yes/no': 0, 'action': 1, 'object': 2, 'location': 3, 'other': 4, 'color': 5, 'human': 6, 'number': 7}
-        self.idx_to_ans_type = {0: 'yes/no', 1: 'action', 2: 'object', 3: 'location', 4: 'other', 5: 'color', 6: 'human', 7: 'number'}
+        self.ans_type_to_idx = {
+            'yes/no': 0,
+            'action': 1,
+            'object': 2,
+            'location': 3,
+            'other': 4,
+            'color': 5,
+            'human': 6,
+            'number': 7}
+        self.idx_to_ans_type = {
+            0: 'yes/no',
+            1: 'action',
+            2: 'object',
+            3: 'location',
+            4: 'other',
+            5: 'color',
+            6: 'human',
+            7: 'number'}
         self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
         self.questions = self.load_questions()
         self.annotations, self.idx_to_ann  = self.load_annotations() if split != 'test' else ([], [])
