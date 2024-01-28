@@ -133,7 +133,8 @@ class VQADataset(Dataset):
     def __len__(self):
         # if self.split == "train":
         #     return 128
-        return len(self.annotations)
+        # return len(self.annotations)
+        return 500
     
     
     def example_processing(self, image, ques, ann):

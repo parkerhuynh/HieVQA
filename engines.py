@@ -79,6 +79,7 @@ def validator(model, data_loader, device, loss_function, args, epoch):
             
             question_bert = batch["question_bert"].to(device)
             question_bert_att_mask = batch["question_bert_att_mask"].to(device)
+            
             question_id = batch["question_id"]
             question_type_str = batch["question_type_str"]
             vqa_answer_str = batch["answer_str"]
