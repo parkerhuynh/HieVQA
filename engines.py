@@ -34,6 +34,7 @@ def trainer(model, data_loader, optimizer, loss_function, epoch, device, args, w
         optimizer.zero_grad()
         qt_loss.backward()
         for vqa_based_qt in vqa_losses:
+            print(vqa_losses[vqa_based_qt])
             vqa_losses[vqa_based_qt].backward(retain_graph=True)
         
         
