@@ -184,11 +184,8 @@ class VQADataset(Dataset):
             "question_bert_att_mask": encoding['attention_mask'].flatten()
         }
         # print(data)
-        # a
-        # return image, question, ann["answer_idx"], ann['answer_type_idx'], ann['id']
-        print(data)
-        print(ann)
-        print("-----------------------")
+        # print(ann)
+        # print("-----------------------")
         return data
 
     
