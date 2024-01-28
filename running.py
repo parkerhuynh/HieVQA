@@ -158,143 +158,143 @@ def main(args):
                 wandb.log(wandb_train_log)
 
 
-        #     if is_main_process() and args.wandb:
+            if is_main_process() and args.wandb:
                 
-        #         combine_result_csv = pd.DataFrame(combine_result)
-        #         val_accuracies, val_prediction_csv_i = calculate_accuracies(combine_result_csv, val_dataset)
+                combine_result_csv = pd.DataFrame(combine_result)
+                val_accuracies, val_prediction_csv_i = calculate_accuracies(combine_result_csv, val_dataset)
                 
-        #         # wandb_val_log = {**{f'val_{k}': float(v) for k, v in val_accuracies.items()}}
-        #         val_accuracies.update({
-        #             "epoch": epoch
-        #         })
-        #         wandb.log(val_accuracies)
-        #         if hasattr(model, 'module'):
-        #             model_without_ddp = model.module
-        #         #Save model
-        #         print(val_accuracies)
-        #         wandb.log(val_accuracies)
-        #         last_model_path = os.path.join(args.output_dir, "model_latest_epoch.pt")
-        #         torch.save(model_without_ddp, last_model_path)
+                # wandb_val_log = {**{f'val_{k}': float(v) for k, v in val_accuracies.items()}}
+                val_accuracies.update({
+                    "epoch": epoch
+                })
+                wandb.log(val_accuracies)
+                if hasattr(model, 'module'):
+                    model_without_ddp = model.module
+                #Save model
+                print(val_accuracies)
+                wandb.log(val_accuracies)
+                last_model_path = os.path.join(args.output_dir, "model_latest_epoch.pt")
+                torch.save(model_without_ddp, last_model_path)
                 
-        #         if val_accuracies['val_accuracy_vqa(vqa-wo-unans)'] > best_acc:
-        #             val_prediction_csv = val_prediction_csv_i
-        #             best_acc = val_accuracies['val_accuracy_vqa(vqa-wo-unans)']
-        #             wandb_log_val_accuracy_best = {**{f'best_{k}': v for k, v in val_accuracies.items()}}
-        #             wandb.log(wandb_log_val_accuracy_best)
+                if val_accuracies['val_accuracy_vqa(vqa-wo-unans)'] > best_acc:
+                    val_prediction_csv = val_prediction_csv_i
+                    best_acc = val_accuracies['val_accuracy_vqa(vqa-wo-unans)']
+                    wandb_log_val_accuracy_best = {**{f'best_{k}': v for k, v in val_accuracies.items()}}
+                    wandb.log(wandb_log_val_accuracy_best)
                     
-        #             best_model_path = os.path.join(args.output_dir, "best_model_state.pt")
-        #             torch.save(model_without_ddp, best_model_path)
+                    best_model_path = os.path.join(args.output_dir, "best_model_state.pt")
+                    torch.save(model_without_ddp, best_model_path)
                     
-        #     print("\n")
-        # if is_main_process() and args.wandb:
+            print("\n")
+        if is_main_process() and args.wandb:
             
-        #     # model = torch.load(best_model_path).cuda()
-        #     # samplers = [None, None]
-        #     # train_loader, val_loader = create_loader(datasets, samplers, args)
-        #     # results = evaluate(model, val_loader, device)
+            # model = torch.load(best_model_path).cuda()
+            # samplers = [None, None]
+            # train_loader, val_loader = create_loader(datasets, samplers, args)
+            # results = evaluate(model, val_loader, device)
             
-        #     # val_prediction_csv = pd.DataFrame(results)
-        #     # val_accuracies, val_prediction_csv = calculate_accuracies(val_prediction_csv, val_dataset)
-        #     # wandb_log_val_accuracy_best = {**{f'best_{k}': v for k, v in val_accuracies.items()}}
-        #     # wandb.log(wandb_log_val_accuracy_best)
+            # val_prediction_csv = pd.DataFrame(results)
+            # val_accuracies, val_prediction_csv = calculate_accuracies(val_prediction_csv, val_dataset)
+            # wandb_log_val_accuracy_best = {**{f'best_{k}': v for k, v in val_accuracies.items()}}
+            # wandb.log(wandb_log_val_accuracy_best)
             
-        #     val_prediction_csv.to_csv("prediction.csv", index=False)
-        #     val_prediction_csv = val_prediction_csv.sort_values(by='question_id')
-        #     directory = os.getcwd()
-        #     file_path = os.path.join(directory, "prediction.csv")
-        #     wandb.save(file_path, directory)
+            val_prediction_csv.to_csv("prediction.csv", index=False)
+            val_prediction_csv = val_prediction_csv.sort_values(by='question_id')
+            directory = os.getcwd()
+            file_path = os.path.join(directory, "prediction.csv")
+            wandb.save(file_path, directory)
             
-        #     y_true = val_prediction_csv['small_answer_type_target']
-        #     y_pred = val_prediction_csv['small_answer_type_prediction']
-        #     conf_matrix = confusion_matrix(y_true, y_pred, labels=y_true.unique())
+            y_true = val_prediction_csv['small_answer_type_target']
+            y_pred = val_prediction_csv['small_answer_type_prediction']
+            conf_matrix = confusion_matrix(y_true, y_pred, labels=y_true.unique())
             
-        #     # Normalize the confusion matrix
-        #     conf_matrix_normalized = conf_matrix.astype('float') / conf_matrix.sum(axis=1)[:, np.newaxis]
+            # Normalize the confusion matrix
+            conf_matrix_normalized = conf_matrix.astype('float') / conf_matrix.sum(axis=1)[:, np.newaxis]
             
-        #     # Set up the matplotlib figure for side-by-side plots
-        #     plt.figure(figsize=(30, 12))
+            # Set up the matplotlib figure for side-by-side plots
+            plt.figure(figsize=(30, 12))
             
-        #     # Regular confusion matrix
-        #     plt.subplot(1, 2, 1)
-        #     sns.heatmap(conf_matrix, annot=True, fmt='d', 
-        #                 xticklabels=y_true.unique(), yticklabels=y_true.unique(), 
-        #                 cmap='Blues')
-        #     plt.title('Confusion Matrix')
-        #     plt.xlabel('Predicted Type')
-        #     plt.ylabel('True Type')
+            # Regular confusion matrix
+            plt.subplot(1, 2, 1)
+            sns.heatmap(conf_matrix, annot=True, fmt='d', 
+                        xticklabels=y_true.unique(), yticklabels=y_true.unique(), 
+                        cmap='Blues')
+            plt.title('Confusion Matrix')
+            plt.xlabel('Predicted Type')
+            plt.ylabel('True Type')
             
-        #     # Normalized confusion matrix
-        #     plt.subplot(1, 2, 2)
-        #     sns.heatmap(conf_matrix_normalized, annot=True, fmt='.2f', 
-        #                 xticklabels=y_true.unique(), yticklabels=y_true.unique(), 
-        #                 cmap='Blues')
-        #     plt.title('Normalized Confusion Matrix')
-        #     plt.xlabel('Predicted Type')
-        #     plt.ylabel('True Type')
+            # Normalized confusion matrix
+            plt.subplot(1, 2, 2)
+            sns.heatmap(conf_matrix_normalized, annot=True, fmt='.2f', 
+                        xticklabels=y_true.unique(), yticklabels=y_true.unique(), 
+                        cmap='Blues')
+            plt.title('Normalized Confusion Matrix')
+            plt.xlabel('Predicted Type')
+            plt.ylabel('True Type')
             
-        #     # Main title
-        #     plt.suptitle(f'{args.task}-{args.version}-{args.version}-{args.dataset}-{args.task}-{args.created}')
+            # Main title
+            plt.suptitle(f'{args.task}-{args.version}-{args.version}-{args.dataset}-{args.task}-{args.created}')
             
-        #     # Save the plot to a buffer
-        #     buffer = BytesIO()
-        #     plt.savefig(buffer, format='png')
-        #     buffer.seek(0)
-        #     image = Image.open(buffer)
-        #     image_array = np.array(image)
+            # Save the plot to a buffer
+            buffer = BytesIO()
+            plt.savefig(buffer, format='png')
+            buffer.seek(0)
+            image = Image.open(buffer)
+            image_array = np.array(image)
             
-        #     # Log the image to wandb
-        #     wandb.log({"Confusion Matrix": wandb.Image(image_array)})
+            # Log the image to wandb
+            wandb.log({"Confusion Matrix": wandb.Image(image_array)})
             
-        #     # Close the plot
-        #     plt.close()
+            # Close the plot
+            plt.close()
             
-        #     y_true = val_prediction_csv['answer_type']
-        #     y_pred = val_prediction_csv['answer_type_prediction']
-        #     conf_matrix = confusion_matrix(y_true, y_pred, labels=y_true.unique())
+            y_true = val_prediction_csv['answer_type']
+            y_pred = val_prediction_csv['answer_type_prediction']
+            conf_matrix = confusion_matrix(y_true, y_pred, labels=y_true.unique())
             
-        #     # Normalize the confusion matrix
-        #     conf_matrix_normalized = conf_matrix.astype('float') / conf_matrix.sum(axis=1)[:, np.newaxis]
+            # Normalize the confusion matrix
+            conf_matrix_normalized = conf_matrix.astype('float') / conf_matrix.sum(axis=1)[:, np.newaxis]
             
-        #     # Set up the matplotlib figure for side-by-side plots
-        #     plt.figure(figsize=(30, 12))
+            # Set up the matplotlib figure for side-by-side plots
+            plt.figure(figsize=(30, 12))
             
-        #     # Regular confusion matrix
-        #     plt.subplot(1, 2, 1)
-        #     sns.heatmap(conf_matrix, annot=True, fmt='d', 
-        #                 xticklabels=y_true.unique(), yticklabels=y_true.unique(), 
-        #                 cmap='Blues')
-        #     plt.title('Confusion Matrix')
-        #     plt.xlabel('Predicted Type')
-        #     plt.ylabel('True Type')
+            # Regular confusion matrix
+            plt.subplot(1, 2, 1)
+            sns.heatmap(conf_matrix, annot=True, fmt='d', 
+                        xticklabels=y_true.unique(), yticklabels=y_true.unique(), 
+                        cmap='Blues')
+            plt.title('Confusion Matrix')
+            plt.xlabel('Predicted Type')
+            plt.ylabel('True Type')
             
-        #     # Normalized confusion matrix
-        #     plt.subplot(1, 2, 2)
-        #     sns.heatmap(conf_matrix_normalized, annot=True, fmt='.2f', 
-        #                 xticklabels=y_true.unique(), yticklabels=y_true.unique(), 
-        #                 cmap='Blues')
-        #     plt.title('Normalized Confusion Matrix')
-        #     plt.xlabel('Predicted Type')
-        #     plt.ylabel('True Type')
+            # Normalized confusion matrix
+            plt.subplot(1, 2, 2)
+            sns.heatmap(conf_matrix_normalized, annot=True, fmt='.2f', 
+                        xticklabels=y_true.unique(), yticklabels=y_true.unique(), 
+                        cmap='Blues')
+            plt.title('Normalized Confusion Matrix')
+            plt.xlabel('Predicted Type')
+            plt.ylabel('True Type')
             
-        #     # Main title
-        #     plt.suptitle(f'{args.task}-{args.version}-{args.version}-{args.dataset}-{args.task}-{args.created}')
+            # Main title
+            plt.suptitle(f'{args.task}-{args.version}-{args.version}-{args.dataset}-{args.task}-{args.created}')
             
-        #     # Save the plot to a buffer
-        #     buffer = BytesIO()
-        #     plt.savefig(buffer, format='png')
-        #     buffer.seek(0)
-        #     image = Image.open(buffer)
-        #     image_array = np.array(image)
+            # Save the plot to a buffer
+            buffer = BytesIO()
+            plt.savefig(buffer, format='png')
+            buffer.seek(0)
+            image = Image.open(buffer)
+            image_array = np.array(image)
             
-        #     # Log the image to wandb
-        #     wandb.log({"Confusion Matrix (3 types)": wandb.Image(image_array)})
+            # Log the image to wandb
+            wandb.log({"Confusion Matrix (3 types)": wandb.Image(image_array)})
             
-        #     # Close the plot
-        #     plt.close()
+            # Close the plot
+            plt.close()
                     
-        #     directory = os.getcwd()
-        #     file_path = os.path.join(directory, f"model_{args.code_version}.onnx")
-        #     wandb.save(file_path, directory)
+            directory = os.getcwd()
+            file_path = os.path.join(directory, f"model_{args.code_version}.onnx")
+            wandb.save(file_path, directory)
 
             
 
