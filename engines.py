@@ -28,11 +28,16 @@ def trainer(model, data_loader, optimizer, loss_function, epoch, device, args, w
         
         qt_output, vqa_outputs = model(images, questions_rnn, question_bert, question_bert_att_mask)
         # qt_output = model(question_bert, question_bert_att_mask)
-        qt_loss, vqa_loss, total_loss = loss_function(qt_output, question_type, vqa_outputs, answers)
+        qt_loss, vqa_losses = loss_function(qt_output, question_type, vqa_outputs, answers)
         total_loss = F.cross_entropy(qt_output, question_type)
         
         optimizer.zero_grad()
         qt_loss.backward()
+        for vqa_based_qt in vqa_losses:
+            vqa_losses[vqa_based_qt].backward()
+        
+        
+        
         optimizer.step()
 
         
