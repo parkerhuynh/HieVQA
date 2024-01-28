@@ -56,9 +56,9 @@ def validator(model, data_loader, device, loss_function, args, epoch):
     model.eval()
     print_freq = args.print_freq
     metric_logger = MetricLogger(delimiter="  ")
-    metric_logger.add_meter('vqa_loss', SmoothedValue(window_size=1, fmt='{value:.6f}'))
+    # metric_logger.add_meter('vqa_loss', SmoothedValue(window_size=1, fmt='{value:.6f}'))
     metric_logger.add_meter('qt_loss', SmoothedValue(window_size=1, fmt='{value:.6f}'))
-    metric_logger.add_meter('total_loss', SmoothedValue(window_size=1, fmt='{value:.6f}'))
+    # metric_logger.add_meter('total_loss', SmoothedValue(window_size=1, fmt='{value:.6f}'))
     
     
     
