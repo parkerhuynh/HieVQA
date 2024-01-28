@@ -41,9 +41,10 @@ def trainer(model, data_loader, optimizer, loss_function, epoch, device, schedul
         # print(qt_loss, total_loss)
         
         optimizer.zero_grad()
-        total_loss.backward()
+        qt_loss.backward()
         optimizer.step()
         scheduler.step()
+        
         if args.wandb:
             wandb.log({"train_vqa_loss_iter": vqa_loss.item()})
         metric_logger.update(vqa_loss=vqa_loss)
