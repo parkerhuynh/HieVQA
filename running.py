@@ -128,7 +128,7 @@ def main(args):
         val_prediction_csv = None
         if is_main_process():
             print(model)
-        val_loader = train_loader
+        # val_loader = train_loader
         for epoch in range(start_epoch, max_epoch):
             print("\n\n" + "--"*50 + f" Epoch {epoch} " + "--"*50 + "\n")
             if args.distributed:
