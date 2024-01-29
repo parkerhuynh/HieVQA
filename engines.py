@@ -31,14 +31,19 @@ def trainer(model, data_loader, optimizer, loss_function, epoch, device, args, w
         for vqa_based_qt in vqa_losses:
             vqa_losses[vqa_based_qt].backward(retain_graph=True)
         optimizer.step()
-        if args.wandb:
-            wandb.log({"train_vqa_loss_iter": qt_loss.item()})
+        
         vqa_loss = sum(vqa_losses.values())
         total_loss = qt_loss+vqa_loss
+        
+        if args.wandb:
+            wandb.log({"train_vqa_loss_iter": vqa_loss.item()})
+            wandb.log({"train_qt_loss_iter": qt_loss.item()})
+            wandb.log({"train_total_loss_iter": total_loss.item()})
         metric_logger.update(vqa_loss=vqa_loss)
         metric_logger.update(qt_loss=qt_loss)
         metric_logger.update(total_loss=total_loss)
         metric_logger.update(lr=optimizer.param_groups[0]["lr"])
+        
     metric_logger.synchronize_between_processes()
     print("Averaged stats:", metric_logger.global_avg())
     return {k: meter.global_avg for k, meter in metric_logger.meters.items()}
