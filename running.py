@@ -113,29 +113,17 @@ def main(args):
         args.optimizer['lr'] = float(args.optimizer['lr'])
         args.schedular['lr'] = float(args.schedular['lr'])
         model = get_model(args, train_dataset)
-        # if is_main_process() and args.wandb:
-        #     batch_example = next(iter(train_loader))
-        #     example_image = batch_example[0]
-        #     example_question = batch_example[1]
-        #     torch.onnx.export(model, (example_image, example_question), f"model_{args.code_version}.onnx")
         model = model.to(device)
         
         #OPTIMIZER and LOSS
         arg_opt = AttrDict(args.optimizer)
-        optimizer = AdamW(model.parameters(), lr=2e-5)
+        optimizer = AdamW(model.parameters(), lr=1e-5)
         loss_fn =  HierarchicalLoss(args, train_dataset)
-
-        # lr_scheduler = None
-        # optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
-        #SET UP
         if args.distributed:
             model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu], find_unused_parameters=True).to(device)
             # model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu])
         
         max_epoch = args.schedular['epochs']
-        # if args.debug:
-        #     max_epoch = 3
-        #     val_loader = train_loader
         start_epoch = 0
         best_acc = 0
         val_prediction_csv = None
@@ -187,17 +175,7 @@ def main(args):
                     
             print("\n")
         if is_main_process() and args.wandb:
-            
-            # model = torch.load(best_model_path).cuda()
-            # samplers = [None, None]
-            # train_loader, val_loader = create_loader(datasets, samplers, args)
-            # results = evaluate(model, val_loader, device)
-            
-            # val_prediction_csv = pd.DataFrame(results)
-            # val_accuracies, val_prediction_csv = calculate_accuracies(val_prediction_csv, val_dataset)
-            # wandb_log_val_accuracy_best = {**{f'best_{k}': v for k, v in val_accuracies.items()}}
-            # wandb.log(wandb_log_val_accuracy_best)
-            
+
             val_prediction_csv.to_csv("prediction.csv", index=False)
             val_prediction_csv = val_prediction_csv.sort_values(by='question_id')
             directory = os.getcwd()
