@@ -106,7 +106,7 @@ def main(args):
         else:
             samplers = [None, None]
         
-        train_dataset_size = len(train_dataset)
+        # train_dataset_size = len(train_dataset)
 
         #CREATE DATASET LOADERS
         train_loader, val_loader = create_loader(datasets, samplers, args)
@@ -116,8 +116,7 @@ def main(args):
         model = model.to(device)
         
         #OPTIMIZER and LOSS
-        arg_opt = AttrDict(args.optimizer)
-        optimizer = AdamW(model.parameters(), lr=1e-5)
+        optimizer = AdamW(model.parameters(), lr=2e-5)
         loss_fn =  HierarchicalLoss(args, train_dataset)
         if args.distributed:
             model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.gpu], find_unused_parameters=True).to(device)
