@@ -48,26 +48,31 @@ class QuestionEmbedding(nn.Module):
 
 
 class QuestionType(nn.Module):
-    def __init__(self, idx_to_answer_type):
+    def __init__(self, args, idx_to_answer_type):
         """
         Initializes the QuestionType model with a Multilayer Perceptron (MLP) architecture.
         """
         super().__init__()
-        self.bert = BertModel.from_pretrained("bert-base-uncased") 
         self.qt_header = nn.Sequential(
-            nn.Linear(self.bert.config.hidden_size, 1000),
+            nn.Linear(args.model_config["image_feature_output"], 1000),
             nn.Dropout(p=0.5),
             nn.Tanh(),
             nn.Linear(1000, len(idx_to_answer_type))
         )
-        
 
-    def forward(self, question_bert, question_bert_att_mask):
-        bert_outputs = self.bert(question_bert, attention_mask=question_bert_att_mask)
-        bert_pooler_output  = bert_outputs.pooler_output
-        qt_outputs = self.qt_header(bert_pooler_output)
+    def forward(self, hidden_features):
+        """
+        INPUT:
+        question_feature (Tensor): The input features for the questions.
+        question_types (Tensor): The true labels for the question types.
+        train (bool): Flag indicating whether the model is in training mode.
 
-        return qt_outputs
+        OUTPUT
+        outputs (Tensor): The predicted class probabilities for each question type.
+        qt_loss : Cross-Entropy loss, returned only in training mode.
+        """
+        outputs = self.qt_header(hidden_features)
+        return outputs
 
 class VQA_header(nn.Module):
     """
@@ -109,14 +114,14 @@ class VQAHieVQA(nn.Module):
             hidden_size=args.model_config["rnn_hidden_size"])
         
         self.vqa_mlp = VQA_header(ans_vocab_type_dict)
-        self.question_type_mlp = QuestionType(idx_to_answer_type)
+        self.question_type_mlp = QuestionType(args, idx_to_answer_type)
             
-    def forward(self, image, question_rnn, question_bert, question_bert_att_mask):
+    def forward(self, image, question_rnn):
         image = self.image_encoder(image)
         question_rnn = self.word_embeddings(question_rnn)
         question_rnn = self.question_encoder(question_rnn)
         combine_features = image*question_rnn
         
-        question_type_output = self.question_type_mlp(question_bert, question_bert_att_mask)
+        question_type_output = self.question_type_mlp(question_rnn)
         vqa_outputs =  self.vqa_mlp(combine_features)
         return question_type_output, vqa_outputs

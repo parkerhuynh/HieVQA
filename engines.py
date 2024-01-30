@@ -24,7 +24,7 @@ def trainer(model, data_loader, optimizer, loss_function, epoch, device, args, w
         answers = batch["answer"].to(device)        
         question_bert = batch["question_bert"].to(device)
         question_bert_att_mask = batch["question_bert_att_mask"].to(device)
-        qt_output, vqa_outputs = model(images, questions_rnn, question_bert, question_bert_att_mask)
+        qt_output, vqa_outputs = model(images, questions_rnn)
         qt_loss, vqa_losses = loss_function(qt_output, question_type, vqa_outputs, answers)
         optimizer.zero_grad()
         qt_loss.backward(retain_graph=True)
@@ -79,7 +79,7 @@ def validator(model, data_loader, device, loss_function, args, epoch):
             vqa_answer_str = batch["answer_str"]
             
             
-            qt_output, vqa_outputs = model(images, questions_rnn, question_bert, question_bert_att_mask)
+            qt_output, vqa_outputs = model(images, questions_rnn)
             qt_loss, vqa_losses = loss_function(qt_output, question_type, vqa_outputs, answers)
 
             vqa_loss = sum(vqa_losses.values())
